@@ -3,10 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:quan_ly_nha_thuoc/providers/auth_provider.dart';
 import 'package:quan_ly_nha_thuoc/providers/customer_provider.dart';
+import 'package:quan_ly_nha_thuoc/providers/cart_provider.dart';
 import 'package:quan_ly_nha_thuoc/screens/auth/customer_info_screen.dart';
 import 'package:quan_ly_nha_thuoc/screens/auth/login_screen.dart';
 import 'package:quan_ly_nha_thuoc/screens/auth/register_screen.dart';
 import 'package:quan_ly_nha_thuoc/screens/home/home_screen.dart';
+import 'package:quan_ly_nha_thuoc/screens/home/home_page_screen.dart';
+import 'package:quan_ly_nha_thuoc/screens/medicines/medicine_list_screen.dart';
 import 'package:quan_ly_nha_thuoc/screens/splash_screen.dart';
 import 'package:quan_ly_nha_thuoc/theme/app_theme.dart';
 import 'package:quan_ly_nha_thuoc/utils/constants.dart';
@@ -40,14 +43,16 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()..init()),
         // Customer Provider
         ChangeNotifierProvider(create: (_) => CustomerProvider()..init()),
+        // Cart Provider
+        ChangeNotifierProvider(create: (_) => CartProvider()),
       ],
       child: MaterialApp(
         title: 'Nhà Thuốc Medion',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
 
-        // Initial route
-        home: const InitialScreen(),
+  // Start directly at HomePageScreen for development/testing
+  home: const HomePageScreen(),
 
         // Named routes
         routes: {
@@ -62,55 +67,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// Initial Screen
-/// Screen khởi động với auto-redirect logic
-class InitialScreen extends StatefulWidget {
-  const InitialScreen({super.key});
-
-  @override
-  State<InitialScreen> createState() => _InitialScreenState();
-}
-
-class _InitialScreenState extends State<InitialScreen> {
-  @override
-  void initState() {
-    super.initState();
-    _checkAuthAndNavigate();
-  }
-
-  /// Check authentication và navigate
-  Future<void> _checkAuthAndNavigate() async {
-    // Wait for splash animation
-    await Future.delayed(const Duration(seconds: 2));
-
-    if (!mounted) return;
-
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final customerProvider = Provider.of<CustomerProvider>(
-      context,
-      listen: false,
-    );
-
-    // Auto-redirect logic
-    if (authProvider.isLoggedIn) {
-      // Đã login
-      if (customerProvider.hasCustomerInfo) {
-        // Có customer info → Chuyển đến home
-        Navigator.of(context).pushReplacementNamed(AppConstants.homeRoute);
-      } else {
-        // Chưa có customer info → Chuyển đến customer info screen
-        Navigator.of(
-          context,
-        ).pushReplacementNamed(AppConstants.customerInfoRoute);
-      }
-    } else {
-      // Chưa login → Chuyển đến login screen
-      Navigator.of(context).pushReplacementNamed(AppConstants.loginRoute);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return const SplashScreen();
-  }
-}
+// Note: InitialScreen redirect logic is intentionally removed here so the
+// app starts directly on HomePageScreen during development. If you want to
+// restore the original auth-based redirect, re-add the InitialScreen class
+// and set home: InitialScreen().

@@ -1,5 +1,14 @@
 /// Constants
 /// Định nghĩa các hằng số được sử dụng trong app
+class ApiConstants {
+  // API Configuration
+  // 🔧 CẤU HÌNH API URL:
+  static const String baseUrl = 'https://10.0.2.2:7283/api';
+  
+  // API Endpoints
+  static const String medicinesEndpoint = '/Medicines';
+}
+
 class AppConstants {
   // API Configuration
   // 🔧 CẤU HÌNH API URL:
