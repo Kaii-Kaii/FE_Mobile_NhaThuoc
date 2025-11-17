@@ -19,6 +19,11 @@ class _HomePageScreenState extends State<HomePageScreen> {
 
   final List<Map<String, dynamic>> _quickActionItems = [
     {
+      'icon': Icons.inventory_2,
+      'label': 'Toàn bộ thuốc',
+      'color': const Color(0xFF03A297),
+    },
+    {
       'icon': Icons.medication,
       'label': 'Thuốc',
       'color': const Color(0xFF023350),
@@ -96,10 +101,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            const Color(0xFF023350),
-            const Color(0xFF02294A),
-          ],
+          colors: [const Color(0xFF023350), const Color(0xFF02294A)],
         ),
         boxShadow: [
           BoxShadow(
@@ -183,7 +185,10 @@ class _HomePageScreenState extends State<HomePageScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.chat_bubble_outline, color: Colors.white),
+                      icon: const Icon(
+                        Icons.chat_bubble_outline,
+                        color: Colors.white,
+                      ),
                       onPressed: () {},
                     ),
                   ),
@@ -194,7 +199,10 @@ class _HomePageScreenState extends State<HomePageScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.notifications_outlined, color: Colors.white),
+                      icon: const Icon(
+                        Icons.notifications_outlined,
+                        color: Colors.white,
+                      ),
                       onPressed: () {},
                     ),
                   ),
@@ -202,7 +210,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
               ),
             ],
           ),
-          
+
           // Phần tìm kiếm
           const SizedBox(height: 16),
           Row(
@@ -224,7 +232,11 @@ class _HomePageScreenState extends State<HomePageScreen> {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.search, color: const Color(0xFF03A297), size: 22),
+                      Icon(
+                        Icons.search,
+                        color: const Color(0xFF03A297),
+                        size: 22,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: TextField(
@@ -250,10 +262,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [
-                      const Color(0xFF03A297),
-                      const Color(0xFF028A7F),
-                    ],
+                    colors: [const Color(0xFF03A297), const Color(0xFF028A7F)],
                   ),
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
@@ -272,7 +281,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
               ),
             ],
           ),
-          
+
           // Thông tin vị trí
           const SizedBox(height: 12),
           Container(
@@ -304,8 +313,8 @@ class _HomePageScreenState extends State<HomePageScreen> {
                 const Spacer(),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 14, 
-                    vertical: 6
+                    horizontal: 14,
+                    vertical: 6,
                   ),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -377,9 +386,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                       decoration: const InputDecoration(
                         hintText: 'Tìm kiếm',
                         border: InputBorder.none,
-                        hintStyle: TextStyle(
-                          color: Colors.grey,
-                        ),
+                        hintStyle: TextStyle(color: Colors.grey),
                       ),
                     ),
                   ),
@@ -414,10 +421,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            const Color(0xFF03A297),
-            const Color(0xFF028A7F),
-          ],
+          colors: [const Color(0xFF03A297), const Color(0xFF028A7F)],
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
@@ -462,11 +466,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
           const SizedBox(height: 14),
           const Text(
             'Bảo vệ sức khỏe của bạn và gia đình với dịch vụ chuyên nghiệp từ các dược sĩ của chúng tôi',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              height: 1.4,
-            ),
+            style: TextStyle(color: Colors.white, fontSize: 14, height: 1.4),
           ),
           const SizedBox(height: 18),
           ElevatedButton(
@@ -478,10 +478,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 12,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -490,10 +487,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                 SizedBox(width: 8),
                 Text(
                   'Tư vấn ngay',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                 ),
               ],
             ),
@@ -563,15 +557,16 @@ class _HomePageScreenState extends State<HomePageScreen> {
                             gradient: LinearGradient(
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
-                              colors: index % 2 == 0
-                                  ? [
-                                      const Color(0xFF023350),
-                                      const Color(0xFF02294A),
-                                    ]
-                                  : [
-                                      const Color(0xFF03A297),
-                                      const Color(0xFF028A7F),
-                                    ],
+                              colors:
+                                  index % 2 == 0
+                                      ? [
+                                        const Color(0xFF023350),
+                                        const Color(0xFF02294A),
+                                      ]
+                                      : [
+                                        const Color(0xFF03A297),
+                                        const Color(0xFF028A7F),
+                                      ],
                             ),
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
@@ -626,10 +621,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [
-                      const Color(0xFF03A297),
-                      const Color(0xFF028A7F),
-                    ],
+                    colors: [const Color(0xFF03A297), const Color(0xFF028A7F)],
                   ),
                   borderRadius: BorderRadius.circular(2),
                 ),
@@ -718,16 +710,17 @@ class _HomePageScreenState extends State<HomePageScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 4),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(4),
-                gradient: _currentBannerIndex == index
-                    ? LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        colors: [
-                          const Color(0xFF03A297),
-                          const Color(0xFF028A7F),
-                        ],
-                      )
-                    : null,
+                gradient:
+                    _currentBannerIndex == index
+                        ? LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            const Color(0xFF03A297),
+                            const Color(0xFF028A7F),
+                          ],
+                        )
+                        : null,
                 color: _currentBannerIndex == index ? null : Colors.grey[300],
               ),
             ),
@@ -780,7 +773,9 @@ class _HomePageScreenState extends State<HomePageScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const FamilyMedicineScreen(),
+                      builder:
+                          (context) =>
+                              const MedicineListScreen(maLoaiThuoc: "LT021"),
                     ),
                   );
                 },
@@ -805,7 +800,9 @@ class _HomePageScreenState extends State<HomePageScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const FamilyMedicineScreen(),
+                      builder:
+                          (context) =>
+                              const MedicineListScreen(maLoaiThuoc: "LT010"),
                     ),
                   );
                 },
@@ -896,10 +893,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
             ),
           ],
         ),
@@ -947,7 +941,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
               TextButton(
                 onPressed: () {
                   // Navigate to all products
-                  MedicineNavigation.navigateToMedicineList(context);
+                  MedicineNavigation.navigateToMedicineList(context, "LT001");
                 },
                 child: const Text(
                   'Xem tất cả',
@@ -1176,10 +1170,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            color: isActive ? const Color(0xFF03A297) : Colors.grey,
-          ),
+          Icon(icon, color: isActive ? const Color(0xFF03A297) : Colors.grey),
           Text(
             label,
             style: TextStyle(
@@ -1201,10 +1192,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            const Color(0xFF03A297),
-            const Color(0xFF028A7F),
-          ],
+          colors: [const Color(0xFF03A297), const Color(0xFF028A7F)],
         ),
         boxShadow: [
           BoxShadow(
@@ -1222,11 +1210,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
           onTap: () {},
           customBorder: const CircleBorder(),
           child: const Center(
-            child: Icon(
-              Icons.chat_bubble,
-              color: Colors.white,
-              size: 28,
-            ),
+            child: Icon(Icons.chat_bubble, color: Colors.white, size: 28),
           ),
         ),
       ),
@@ -1236,25 +1220,35 @@ class _HomePageScreenState extends State<HomePageScreen> {
   // Handle tap on quick action buttons
   void _handleQuickActionTap(int index) {
     switch (index) {
-      case 0: // Thuốc
-        MedicineNavigation.navigateToMedicineList(context);
-        break;
-      case 1: // Tủ thuốc
+      case 0: // Toàn bộ thuốc
         Navigator.push(
-          context, 
-          MaterialPageRoute(builder: (context) => const FamilyMedicineScreen())
+          context,
+          MaterialPageRoute(
+            builder: (_) => const MedicineListScreen(title: 'Toàn bộ thuốc'),
+          ),
         );
         break;
-      case 2: // Mua hàng
-        MedicineNavigation.navigateToMedicineList(context);
+      case 1: // Thuốc
+        MedicineNavigation.navigateToMedicineList(context, "LT001");
         break;
-      case 3: // Thương hiệu
+      case 2: // Tủ thuốc
         Navigator.push(
-          context, 
-          MaterialPageRoute(builder: (context) => const TrustedBrandScreen())
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => const MedicineListScreen(maLoaiThuoc: "LT010"),
+          ),
+        );
+        break;
+      case 3: // Mua hàng
+        MedicineNavigation.navigateToMedicineList(context, "LT001");
+        break;
+      case 4: // Thương hiệu
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const TrustedBrandScreen()),
         );
         break;
     }
   }
 }
-

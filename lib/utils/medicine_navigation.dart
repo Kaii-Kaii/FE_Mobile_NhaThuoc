@@ -1,78 +1,48 @@
 import 'package:flutter/material.dart';
-import '../models/medicine_model.dart';
+import '../models/medicine_by_type.dart';
 import '../screens/medicines/medicine_list_screen.dart';
 import '../screens/medicines/medicine_detail_screen.dart';
-import '../screens/medicines/cart_screen.dart';
-import '../screens/medicines/checkout_screen.dart';
 import '../screens/medicines/family_medicine_screen.dart';
 import '../screens/medicines/trusted_brand_screen.dart';
 
-/// Navigation Helper
-/// Hỗ trợ điều hướng giữa các màn hình trong ứng dụng
+/// Bộ điều hướng chung
 class MedicineNavigation {
-  /// Điều hướng đến màn hình danh sách thuốc
-  static void goToMedicineList(BuildContext context) {
+  /// Điều hướng đến danh sách thuốc theo mã loại
+  static void goToMedicineList(BuildContext context, String maLoaiThuoc) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const MedicineListScreen()),
+      MaterialPageRoute(
+        builder: (_) => MedicineListScreen(maLoaiThuoc: maLoaiThuoc),
+      ),
     );
   }
-  
-  /// Điều hướng đến màn hình danh sách thuốc (alias for goToMedicineList)
-  static void navigateToMedicineList(BuildContext context) {
-    goToMedicineList(context);
+
+  /// Alias cho dễ dùng
+  static void navigateToMedicineList(BuildContext context, String maLoaiThuoc) {
+    goToMedicineList(context, maLoaiThuoc);
   }
-  
-  /// Điều hướng đến màn hình tủ thuốc gia đình
+
+  /// Điều hướng đến màn hình tủ thuốc
   static void goToFamilyMedicine(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const FamilyMedicineScreen()),
+      MaterialPageRoute(builder: (_) => const FamilyMedicineScreen()),
     );
   }
-  
-  /// Điều hướng đến màn hình thương hiệu tin dùng
+
+  /// Điều hướng đến màn hình thương hiệu
   static void goToTrustedBrands(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const TrustedBrandScreen()),
+      MaterialPageRoute(builder: (_) => const TrustedBrandScreen()),
     );
   }
 
   /// Điều hướng đến màn hình chi tiết thuốc
-  static void goToMedicineDetail(BuildContext context, Medicine medicine) {
+  static void goToMedicineDetail(BuildContext context, String maThuoc) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => MedicineDetailScreen(maThuoc: medicine.id.toString())),
-    );
-  }
-
-  /// Điều hướng đến màn hình giỏ hàng
-  static void goToCart(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const CartScreen()),
-    );
-  }
-
-  /// Điều hướng đến màn hình thanh toán
-  static void goToCheckout(
-    BuildContext context, {
-    required List<CartItem> cartItems,
-    required double subtotal,
-    required double shippingFee,
-    required double total,
-  }) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CheckoutScreen(
-          cartItems: cartItems,
-          subtotal: subtotal,
-          shippingFee: shippingFee,
-          total: total,
-        ),
-      ),
+      MaterialPageRoute(builder: (_) => MedicineDetailScreen(maThuoc: maThuoc)),
     );
   }
 }

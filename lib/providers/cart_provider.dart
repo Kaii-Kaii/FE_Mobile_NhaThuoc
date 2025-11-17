@@ -1,62 +1,87 @@
 import 'package:flutter/foundation.dart';
-import '../models/medicine_model.dart';
+import '../models/cart_item_model.dart';
+import '../models/medicine_by_type.dart';
+import '../models/medicine_price_option.dart';
 
 class CartProvider extends ChangeNotifier {
-  List<CartItem> _items = [];
+  final List<CartEntry> _items = [];
 
-  List<CartItem> get items => _items;
+  List<CartEntry> get items => _items;
 
-  int get itemCount => _items.length;
+  num get totalAmount => _items.fold(0, (sum, e) => sum + e.totalPrice);
 
-  double get totalAmount {
-    return _items.fold(0, (sum, item) => sum + item.totalPrice);
-  }
+  /// THÊM THUỐC VÀO GIỎ
+  void addMedicine({
+    required MedicineByType medicine,
+    required MedicinePriceOption? option,
+    int quantity = 1,
+  }) {
+    final key = '${medicine.maThuoc}__${option?.maGiaThuoc ?? "default"}';
 
-  void addItem(Medicine medicine, {int quantity = 1}) {
-    final existingIndex = _items.indexWhere((item) => item.medicine.id == medicine.id);
+    final index = _items.indexWhere((e) => e.key == key);
 
-    if (existingIndex >= 0) {
-      // Thuốc đã có trong giỏ hàng, chỉ tăng số lượng
-      _items[existingIndex].quantity += quantity;
+    if (index >= 0) {
+      // Đã có trong giỏ → tăng số lượng
+      _items[index].quantity += quantity;
     } else {
-      // Thuốc chưa có trong giỏ hàng, thêm mới
-      _items.add(CartItem(medicine: medicine, quantity: quantity));
+      // Thêm mới
+      _items.add(
+        CartEntry(
+          medicineId: medicine.maThuoc,
+          name: medicine.tenThuoc,
+          rawImageUrl: medicine.urlAnh,
+          supplierName: medicine.tenNCC,
+          optionId: option?.maGiaThuoc,
+          unitId: option?.maLoaiDonVi,
+          unitName: option?.tenLoaiDonVi ?? medicine.tenLoaiDonVi ?? "Đơn vị",
+          unitQuantity: option?.soLuong?.toInt(),
+          price: option?.donGia ?? medicine.donGiaSi ?? 0,
+          availableQuantity: option?.soLuongCon?.toInt(),
+          quantity: quantity,
+        ),
+      );
     }
+
     notifyListeners();
   }
 
-  void removeItem(int medicineId) {
-    _items.removeWhere((item) => item.medicine.id == medicineId);
+  /// XOÁ 1 ITEM
+  void removeItem(String key) {
+    _items.removeWhere((e) => e.key == key);
     notifyListeners();
   }
 
-  void updateQuantity(int medicineId, int newQuantity) {
+  /// THAY ĐỔI SỐ LƯỢNG
+  void updateQuantity(String key, int newQuantity) {
+    final index = _items.indexWhere((e) => e.key == key);
+    if (index == -1) return;
+
     if (newQuantity <= 0) {
-      removeItem(medicineId);
-      return;
-    }
-    
-    final index = _items.indexWhere((item) => item.medicine.id == medicineId);
-    if (index >= 0) {
+      removeItem(key);
+    } else {
       _items[index].quantity = newQuantity;
-      notifyListeners();
     }
+
+    notifyListeners();
   }
 
-  void decreaseQuantity(int medicineId) {
-    final index = _items.indexWhere((item) => item.medicine.id == medicineId);
-    if (index >= 0) {
-      if (_items[index].quantity > 1) {
-        _items[index].quantity--;
-      } else {
-        _items.removeAt(index);
-      }
-      notifyListeners();
+  /// GIẢM SỐ LƯỢNG
+  void decreaseQuantity(String key) {
+    final index = _items.indexWhere((e) => e.key == key);
+    if (index == -1) return;
+
+    if (_items[index].quantity > 1) {
+      _items[index].quantity--;
+    } else {
+      _items.removeAt(index);
     }
+
+    notifyListeners();
   }
 
+  /// XOÁ GIỎ
   void clear() {
-    _items = [];
+    _items.clear();
     notifyListeners();
   }
 }

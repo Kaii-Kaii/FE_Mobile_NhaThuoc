@@ -4,7 +4,7 @@ class ApiConstants {
   // API Configuration
   // 🔧 CẤU HÌNH API URL:
   static const String baseUrl = 'https://10.0.2.2:7283/api';
-  
+
   // API Endpoints
   static const String medicinesEndpoint = '/Medicines';
 }
@@ -26,13 +26,15 @@ class AppConstants {
   // ⚠️ QUAN TRỌNG: Không có dấu / ở đầu để Dio combine đúng với baseUrl
   // ⚠️ Cả Login và Register đều dùng endpoint /TaiKhoan/Login
   static const String loginEndpoint = '/TaiKhoan/Login';
-  static const String registerEndpoint ='/TaiKhoan/ConfirmEmail'; // ✅ Dùng chung với Login
+  static const String registerEndpoint =
+      '/TaiKhoan/ConfirmEmail'; // ✅ Dùng chung với Login
   static const String customerEndpoint = '/KhachHang';
 
   // Local Storage Keys
   static const String userKey = 'user';
   static const String customerKey = 'customer';
   static const String rememberMeKey = 'remember_me';
+  static const String cartKey = 'cart_items';
 
   // Validation
   static const int minUsernameLength = 6;

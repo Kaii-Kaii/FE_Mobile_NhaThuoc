@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
-import '../../models/medicine_model.dart';
 import '../../utils/medicine_navigation.dart';
 import 'medicine_list_screen.dart';
 

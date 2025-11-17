@@ -1,79 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/cart_provider.dart';
 import '../../theme/app_theme.dart';
-import '../../models/medicine_model.dart';
-import './checkout_screen.dart';
 
-class CartScreen extends StatefulWidget {
-  const CartScreen({Key? key}) : super(key: key);
-
-  @override
-  State<CartScreen> createState() => _CartScreenState();
-}
-
-class _CartScreenState extends State<CartScreen> {
-  // Dummy data cho giao diện
-  final List<CartItem> _dummyCartItems = [
-    CartItem(
-      medicine: Medicine(
-        id: 1,
-        name: 'Paracetamol',
-        description: 'Thuốc giảm đau, hạ sốt',
-        price: 15000,
-        image: 'https://cdn.nhathuoclongchau.com.vn/unsafe/373x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/00502L_paracetamol_500mg_hapharco_hop_10_vi_x_10_vien_7302_61c1_large_92f99a9343.JPG',
-        category: 'Thuốc không kê đơn',
-        stockQuantity: 100,
-        manufacturer: 'Dược Hậu Giang',
-        dosageForm: 'Viên nén',
-        dosageInstructions: 'Uống 1-2 viên mỗi 4-6 giờ khi cần',
-        requiresPrescription: false,
-      ),
-      quantity: 2,
-    ),
-    CartItem(
-      medicine: Medicine(
-        id: 3,
-        name: 'Vitamin C',
-        description: 'Bổ sung vitamin C',
-        price: 35000,
-        image: 'https://cdn.nhathuoclongchau.com.vn/unsafe/373x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/DSC_00743_81b06b33d3.jpg',
-        category: 'Thực phẩm chức năng',
-        stockQuantity: 200,
-        manufacturer: 'Pharma',
-        dosageForm: 'Viên nén sủi',
-        dosageInstructions: 'Uống 1 viên/ngày',
-        requiresPrescription: false,
-      ),
-      quantity: 1,
-    ),
-  ];
-
-  double get _totalAmount {
-    return _dummyCartItems.fold(0, (sum, item) => sum + item.totalPrice);
-  }
+class CartScreen extends StatelessWidget {
+  const CartScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final cart = context.watch<CartProvider>();
+    final items = cart.items;
+
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         backgroundColor: AppTheme.primaryColor,
-        title: const Text('Giỏ hàng'),
-        elevation: 0,
+        title: const Text("Giỏ hàng"),
       ),
-      body: _dummyCartItems.isEmpty
-          ? _buildEmptyCart()
-          : Column(
-              children: [
-                Expanded(
-                  child: _buildCartItemList(),
-                ),
-                _buildOrderSummary(),
-              ],
-            ),
+
+      body:
+          items.isEmpty
+              ? _buildEmptyCart(context)
+              : Column(
+                children: [
+                  Expanded(child: _buildItemList(context, cart)),
+                  _buildSummary(context, cart),
+                ],
+              ),
     );
   }
 
-  Widget _buildEmptyCart() {
+  // ---------------- EMPTY ------------------
+  Widget _buildEmptyCart(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -85,7 +43,7 @@ class _CartScreenState extends State<CartScreen> {
           ),
           const SizedBox(height: 20),
           Text(
-            'Giỏ hàng trống',
+            "Giỏ hàng trống",
             style: TextStyle(
               fontSize: 20,
               color: Colors.grey[700],
@@ -93,88 +51,75 @@ class _CartScreenState extends State<CartScreen> {
             ),
           ),
           const SizedBox(height: 10),
-          Text(
-            'Hãy thêm sản phẩm vào giỏ hàng',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 30),
+          Text("Hãy thêm sản phẩm vào giỏ"),
+          const SizedBox(height: 20),
+
           ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context); // Back to medicines list
-            },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.primaryColor,
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
             ),
-            child: const Text(
-              'Tiếp tục mua sắm',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Tiếp tục mua sắm"),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCartItemList() {
+  // ---------------- LIST -------------------
+  Widget _buildItemList(BuildContext context, CartProvider cart) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: _dummyCartItems.length,
-      itemBuilder: (context, index) {
-        final cartItem = _dummyCartItems[index];
-        return _buildCartItemCard(cartItem);
+      itemCount: cart.items.length,
+      itemBuilder: (_, index) {
+        final item = cart.items[index];
+        return _buildItem(context, cart, item);
       },
     );
   }
 
-  Widget _buildCartItemCard(CartItem cartItem) {
+  Widget _buildItem(BuildContext context, CartProvider cart, item) {
+    final imageUrl =
+        (item.rawImageUrl != null &&
+                (item.rawImageUrl!.startsWith("http") ||
+                    item.rawImageUrl!.startsWith("https")))
+            ? item.rawImageUrl!
+            : "https://res.cloudinary.com/dmu0nknhg/image/upload/v1761064479/thuoc_images/thuoc/${item.rawImageUrl}";
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8),
         ],
       ),
       child: Row(
         children: [
-          // Hình ảnh thuốc
+          // IMAGE
           ClipRRect(
             borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(15),
-              bottomLeft: Radius.circular(15),
+              topLeft: Radius.circular(12),
+              bottomLeft: Radius.circular(12),
             ),
             child: Image.network(
-              cartItem.medicine.image,
+              imageUrl,
               width: 100,
               height: 100,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: Colors.grey[200],
-                  child: const Icon(Icons.image_not_supported, size: 50, color: Colors.grey),
-                  alignment: Alignment.center,
-                  width: 100,
-                  height: 100,
-                );
-              },
+              errorBuilder:
+                  (_, __, ___) => Container(
+                    width: 100,
+                    height: 100,
+                    color: Colors.grey[200],
+                    child: const Icon(Icons.broken_image, size: 40),
+                  ),
             ),
           ),
-          // Thông tin thuốc
+
+          // INFO
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(12),
@@ -182,38 +127,36 @@ class _CartScreenState extends State<CartScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    cartItem.medicine.name,
+                    item.name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: 15,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
+
                   const SizedBox(height: 4),
                   Text(
-                    '${cartItem.medicine.manufacturer} • ${cartItem.medicine.dosageForm}',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey[600],
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    item.unitName,
+                    style: TextStyle(color: Colors.grey[600]),
                   ),
+
                   const SizedBox(height: 8),
                   Text(
-                    '${cartItem.medicine.price.toInt().toString()} đ',
+                    "${item.price.toInt()} đ",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
                       color: AppTheme.secondaryColor,
+                      fontSize: 16,
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          // Số lượng
+
+          // QUANTITY
           Container(
             margin: const EdgeInsets.only(right: 12),
             decoration: BoxDecoration(
@@ -222,38 +165,21 @@ class _CartScreenState extends State<CartScreen> {
             ),
             child: Row(
               children: [
-                _buildQuantityButton(
+                _qtyBtn(
                   icon: Icons.remove,
-                  onPressed: () {
-                    setState(() {
-                      if (cartItem.quantity > 1) {
-                        cartItem.quantity--;
-                      } else {
-                        _dummyCartItems.remove(cartItem);
-                      }
-                    });
-                  },
+                  onTap: () => cart.updateQuantity(item.key, item.quantity - 1),
                 ),
                 Container(
                   width: 30,
                   alignment: Alignment.center,
                   child: Text(
-                    cartItem.quantity.toString(),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                    "${item.quantity}",
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
-                _buildQuantityButton(
+                _qtyBtn(
                   icon: Icons.add,
-                  onPressed: () {
-                    setState(() {
-                      if (cartItem.quantity < cartItem.medicine.stockQuantity) {
-                        cartItem.quantity++;
-                      }
-                    });
-                  },
+                  onTap: () => cart.updateQuantity(item.key, item.quantity + 1),
                 ),
               ],
             ),
@@ -263,91 +189,58 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  Widget _buildQuantityButton({required IconData icon, required VoidCallback onPressed}) {
+  Widget _qtyBtn({required IconData icon, required VoidCallback onTap}) {
     return InkWell(
-      onTap: onPressed,
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(6),
-        decoration: BoxDecoration(
-          color: Colors.grey[200],
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Icon(
-          icon,
-          size: 18,
-          color: Colors.black87,
-        ),
+        child: Icon(icon, size: 18),
       ),
     );
   }
 
-  Widget _buildOrderSummary() {
+  // ---------------- SUMMARY -------------------
+  Widget _buildSummary(BuildContext context, CartProvider cart) {
+    final total = cart.totalAmount.toInt();
+    const shipping = 15000;
+
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
       ),
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Thông tin đơn hàng',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-              color: AppTheme.primaryColor,
-            ),
+            "Thông tin đơn hàng",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 16),
-          _buildSummaryRow('Tạm tính', '${_totalAmount.toInt().toString()} đ'),
-          _buildSummaryRow('Phí vận chuyển', '15,000 đ'),
-          const Divider(height: 32),
-          _buildSummaryRow(
-            'Tổng cộng',
-            '${(_totalAmount + 15000).toInt().toString()} đ',
-            isTotal: true,
-          ),
+
+          const SizedBox(height: 12),
+          _row("Tạm tính", "$total đ"),
+          _row("Phí vận chuyển", "$shipping đ"),
+
+          const Divider(height: 28),
+          _row("Tổng cộng", "${total + shipping} đ", bold: true),
+
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CheckoutScreen(
-                      cartItems: _dummyCartItems,
-                      subtotal: _totalAmount,
-                      shippingFee: 15000,
-                      total: _totalAmount + 15000,
-                    ),
-                  ),
-                );
-              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryColor,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
               ),
+              onPressed: () {},
               child: const Text(
-                'Tiến hành thanh toán',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                "Tiến hành thanh toán",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ),
           ),
@@ -356,7 +249,7 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  Widget _buildSummaryRow(String label, String value, {bool isTotal = false}) {
+  Widget _row(String label, String value, {bool bold = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -365,17 +258,16 @@ class _CartScreenState extends State<CartScreen> {
           Text(
             label,
             style: TextStyle(
-              fontSize: isTotal ? 18 : 16,
-              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-              color: isTotal ? AppTheme.primaryColor : Colors.black87,
+              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+              fontSize: bold ? 18 : 16,
             ),
           ),
           Text(
             value,
             style: TextStyle(
-              fontSize: isTotal ? 18 : 16,
-              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-              color: isTotal ? AppTheme.secondaryColor : Colors.black87,
+              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+              fontSize: bold ? 18 : 16,
+              color: AppTheme.secondaryColor,
             ),
           ),
         ],

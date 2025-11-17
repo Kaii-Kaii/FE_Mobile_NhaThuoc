@@ -1,22 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
-import '../../models/medicine_model.dart';
+import '../../providers/cart_provider.dart';
+import '../../models/cart_item_model.dart'; // CartEntry
 
 class CheckoutScreen extends StatefulWidget {
-  final List<CartItem> cartItems;
-  final double subtotal;
-  final double shippingFee;
-  final double total;
-
-  const CheckoutScreen({
-    Key? key,
-    required this.cartItems,
-    required this.subtotal,
-    required this.shippingFee,
-    required this.total,
-  }) : super(key: key);
+  const CheckoutScreen({super.key});
 
   @override
   State<CheckoutScreen> createState() => _CheckoutScreenState();
@@ -24,36 +15,36 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _addressController = TextEditingController();
-  final _noteController = TextEditingController();
-  String _selectedPaymentMethod = 'Thanh toán khi nhận hàng';
+  final _name = TextEditingController();
+  final _phone = TextEditingController();
+  final _address = TextEditingController();
+  final _note = TextEditingController();
 
-  final List<String> _paymentMethods = [
-    'Thanh toán khi nhận hàng',
-    'Chuyển khoản ngân hàng',
-    'Ví điện tử MoMo',
-    'Thẻ tín dụng/ghi nợ',
-  ];
+  String paymentMethod = "Thanh toán khi nhận hàng";
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _phoneController.dispose();
-    _addressController.dispose();
-    _noteController.dispose();
+    _name.dispose();
+    _phone.dispose();
+    _address.dispose();
+    _note.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final cart = context.watch<CartProvider>();
+    final List<CartEntry> items = cart.items;
+
+    final num subtotal = cart.totalAmount;
+    const num shipping = 15000;
+    final num total = subtotal + shipping;
+
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         backgroundColor: AppTheme.primaryColor,
-        title: const Text('Thanh toán'),
-        elevation: 0,
+        title: const Text("Thanh toán"),
       ),
       body: Column(
         children: [
@@ -65,30 +56,33 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionTitle('Thông tin giao hàng'),
-                    _buildShippingInfoForm(),
+                    _title("Thông tin giao hàng"),
+                    _shippingForm(),
+
                     const SizedBox(height: 24),
-                    _buildSectionTitle('Phương thức thanh toán'),
-                    _buildPaymentMethodSelector(),
+                    _title("Phương thức thanh toán"),
+                    _paymentSelector(),
+
                     const SizedBox(height: 24),
-                    _buildSectionTitle('Đơn hàng của bạn'),
-                    _buildOrderSummary(),
+                    _title("Đơn hàng của bạn"),
+                    _orderSummary(items, subtotal, shipping, total),
                   ],
                 ),
               ),
             ),
           ),
-          _buildBottomBar(),
+
+          _bottomBar(total),
         ],
       ),
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _title(String text) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Text(
-        title,
+        text,
         style: const TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.bold,
@@ -98,66 +92,45 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  Widget _buildShippingInfoForm() {
+  //==========================================================
+  // SHIPPING FORM
+  //==========================================================
+  Widget _shippingForm() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: _box(),
       child: Column(
         children: [
           CustomTextField(
-            controller: _nameController,
-            labelText: 'Họ và tên',
+            controller: _name,
+            labelText: "Họ và tên",
             prefixIcon: Icons.person,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Vui lòng nhập họ tên';
-              }
-              return null;
-            },
+            validator: (v) => v!.isEmpty ? "Vui lòng nhập họ tên" : null,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
+
           CustomTextField(
-            controller: _phoneController,
-            labelText: 'Số điện thoại',
-            keyboardType: TextInputType.phone,
+            controller: _phone,
+            labelText: "Số điện thoại",
             prefixIcon: Icons.phone,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Vui lòng nhập số điện thoại';
-              }
-              if (value.length < 10) {
-                return 'Số điện thoại không hợp lệ';
-              }
-              return null;
-            },
+            keyboardType: TextInputType.phone,
+            validator:
+                (v) => v!.length < 10 ? "Số điện thoại không hợp lệ" : null,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
+
           CustomTextField(
-            controller: _addressController,
-            labelText: 'Địa chỉ giao hàng',
+            controller: _address,
+            labelText: "Địa chỉ giao hàng",
             prefixIcon: Icons.location_on,
             maxLines: 2,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Vui lòng nhập địa chỉ';
-              }
-              return null;
-            },
+            validator: (v) => v!.isEmpty ? "Vui lòng nhập địa chỉ" : null,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
+
           CustomTextField(
-            controller: _noteController,
-            labelText: 'Ghi chú (tùy chọn)',
+            controller: _note,
+            labelText: "Ghi chú (tuỳ chọn)",
             prefixIcon: Icons.note,
             maxLines: 2,
           ),
@@ -166,125 +139,118 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  Widget _buildPaymentMethodSelector() {
+  //==========================================================
+  // PAYMENT SELECTOR
+  //==========================================================
+  Widget _paymentSelector() {
+    final methods = [
+      "Thanh toán khi nhận hàng",
+      "Chuyển khoản ngân hàng",
+      "Ví điện tử MoMo",
+      "Thẻ tín dụng / ghi nợ",
+    ];
+
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: _box(),
       child: Column(
-        children: _paymentMethods.map((method) {
-          return RadioListTile<String>(
-            title: Text(method),
-            value: method,
-            groupValue: _selectedPaymentMethod,
-            activeColor: AppTheme.secondaryColor,
-            contentPadding: EdgeInsets.zero,
-            onChanged: (value) {
-              setState(() {
-                _selectedPaymentMethod = value!;
-              });
-            },
-          );
-        }).toList(),
+        children:
+            methods.map((m) {
+              return RadioListTile(
+                title: Text(m),
+                value: m,
+                groupValue: paymentMethod,
+                activeColor: AppTheme.secondaryColor,
+                onChanged: (v) => setState(() => paymentMethod = v!),
+              );
+            }).toList(),
       ),
     );
   }
 
-  Widget _buildOrderSummary() {
+  //==========================================================
+  // ORDER SUMMARY
+  //==========================================================
+  Widget _orderSummary(
+    List<CartEntry> items,
+    num subtotal,
+    num ship,
+    num total,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: _box(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Order items
-          ...widget.cartItems.map((item) => _buildOrderItem(item)).toList(),
-          const Divider(height: 32),
-          
-          // Order subtotal
-          _buildPriceRow('Tạm tính', '${widget.subtotal.toInt().toString()} đ'),
-          _buildPriceRow('Phí vận chuyển', '${widget.shippingFee.toInt().toString()} đ'),
-          const Divider(height: 24),
-          
-          // Order total
-          _buildPriceRow(
-            'Tổng cộng',
-            '${widget.total.toInt().toString()} đ',
-            isTotal: true,
-          ),
+          ...items.map((e) => _orderItem(e)),
+
+          const Divider(height: 30),
+
+          _row("Tạm tính", "${subtotal.toInt()} đ"),
+          _row("Phí vận chuyển", "${ship.toInt()} đ"),
+
+          const Divider(height: 30),
+
+          _row("Tổng cộng", "${total.toInt()} đ", total: true),
         ],
       ),
     );
   }
 
-  Widget _buildOrderItem(CartItem item) {
+  Widget _orderItem(CartEntry e) {
+    final img = e.rawImageUrl;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          // Thuốc image
           Container(
             width: 60,
             height: 60,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              image: DecorationImage(
-                image: NetworkImage(item.medicine.image),
-                fit: BoxFit.cover,
-                onError: (exception, stackTrace) => const AssetImage('assets/images/medicine_placeholder.png'),
-              ),
+              color: Colors.grey[200],
+              image:
+                  img != null && img.isNotEmpty
+                      ? DecorationImage(
+                        image: NetworkImage(img),
+                        fit: BoxFit.cover,
+                      )
+                      : null,
             ),
+            child:
+                img == null || img.isEmpty
+                    ? const Icon(Icons.medication, size: 30)
+                    : null,
           ),
           const SizedBox(width: 12),
-          
-          // Thuốc details
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.medicine.name,
+                  e.name,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontSize: 15,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
+
                 Text(
-                  '${item.medicine.price.toInt().toString()} đ x ${item.quantity}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
+                  "${e.price.toInt()} đ x ${e.quantity}",
+                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
                 ),
               ],
             ),
           ),
-          
-          // Item total
+
           Text(
-            '${item.totalPrice.toInt().toString()} đ',
+            "${e.totalPrice.toInt()} đ",
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 16,
@@ -296,66 +262,25 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  Widget _buildPriceRow(String label, String value, {bool isTotal = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: isTotal ? 18 : 16,
-              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-              color: isTotal ? AppTheme.primaryColor : Colors.black87,
-            ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: isTotal ? 18 : 16,
-              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-              color: isTotal ? AppTheme.secondaryColor : Colors.black87,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBottomBar() {
+  //==========================================================
+  // BOTTOM BAR
+  //==========================================================
+  Widget _bottomBar(num total) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
-      ),
+      decoration: _box(),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Column(
-            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Tổng thanh toán',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                ),
+                "Tổng thanh toán",
+                style: TextStyle(color: Colors.grey),
               ),
               Text(
-                '${widget.total.toInt().toString()} đ',
+                "${total.toInt()} đ",
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -364,28 +289,75 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ),
             ],
           ),
+
           CustomButton(
-            onPressed: _processOrder,
-            text: 'Đặt hàng',
+            text: "Đặt hàng",
             width: 150,
             height: 50,
             color: AppTheme.secondaryColor,
             borderRadius: 10,
+            onPressed: _submitOrder,
           ),
         ],
       ),
     );
   }
 
-  void _processOrder() {
+  //==========================================================
+  // SUBMIT ORDER
+  //==========================================================
+  void _submitOrder() {
     if (_formKey.currentState!.validate()) {
-      // Xử lý đặt hàng
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Đặt hàng thành công!'),
+          content: Text("Đặt hàng thành công!"),
           backgroundColor: AppTheme.secondaryColor,
         ),
       );
     }
+  }
+
+  //==========================================================
+  // DECORATION
+  //==========================================================
+  BoxDecoration _box() {
+    return BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(10),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.05),
+          blurRadius: 8,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    );
+  }
+
+  Widget _row(String l, String v, {bool total = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            l,
+            style: TextStyle(
+              fontSize: total ? 18 : 16,
+              fontWeight: total ? FontWeight.bold : FontWeight.normal,
+              color: total ? AppTheme.primaryColor : Colors.black87,
+            ),
+          ),
+          Text(
+            v,
+            style: TextStyle(
+              fontSize: total ? 18 : 16,
+              fontWeight: total ? FontWeight.bold : FontWeight.normal,
+              color: total ? AppTheme.secondaryColor : Colors.black87,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

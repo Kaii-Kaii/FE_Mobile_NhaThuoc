@@ -1,3 +1,6 @@
+import 'medicine_price_option.dart';
+import 'medicine_by_type.dart';
+
 class MedicineDetail {
   final String maThuoc;
   final String? maLoaiThuoc;
@@ -8,11 +11,10 @@ class MedicineDetail {
   final String? cachDung;
   final String? luuY;
   final String? urlAnh;
-  final int? soLuong;
-  final int? donGiaSi;
-  final int? donGiaLe;
   final String? tenNCC;
-  final String? tenLoaiDonVi;
+
+  /// Danh sách các loại giá / đơn vị thuốc
+  final List<MedicinePriceOption> giaThuocs;
 
   MedicineDetail({
     required this.maThuoc,
@@ -24,29 +26,39 @@ class MedicineDetail {
     this.cachDung,
     this.luuY,
     this.urlAnh,
-    this.soLuong,
-    this.donGiaSi,
-    this.donGiaLe,
     this.tenNCC,
-    this.tenLoaiDonVi,
+    required this.giaThuocs,
   });
 
   factory MedicineDetail.fromJson(Map<String, dynamic> j) {
     return MedicineDetail(
-      maThuoc: j['maThuoc'] as String? ?? '',
-      maLoaiThuoc: j['maLoaiThuoc'] as String?,
-      tenThuoc: j['tenThuoc'] as String? ?? '',
-      thanhPhan: j['thanhPhan'] as String?,
-      moTa: j['moTa'] as String?,
-      congDung: j['congDung'] as String?,
-      cachDung: j['cachDung'] as String?,
-      luuY: j['luuY'] as String?,
-      urlAnh: j['urlAnh'] as String?,
-      soLuong: j['soLuong'] is int ? j['soLuong'] as int : int.tryParse('${j['soLuong']}'),
-      donGiaSi: j['donGiaSi'] is int ? j['donGiaSi'] as int : int.tryParse('${j['donGiaSi']}'),
-      donGiaLe: j['donGiaLe'] is int ? j['donGiaLe'] as int : int.tryParse('${j['donGiaLe']}'),
-      tenNCC: j['tenNCC'] as String?,
-      tenLoaiDonVi: j['tenLoaiDonVi'] as String?,
+      maThuoc: j['maThuoc'] ?? '',
+      maLoaiThuoc: j['maLoaiThuoc'],
+      tenThuoc: j['tenThuoc'] ?? '',
+      thanhPhan: j['thanhPhan'],
+      moTa: j['moTa'],
+      congDung: j['congDung'],
+      cachDung: j['cachDung'],
+      luuY: j['luuY'],
+      urlAnh: j['urlAnh'],
+      tenNCC: j['tenNCC'],
+      giaThuocs:
+          (j['giaThuocs'] as List<dynamic>? ?? [])
+              .map((x) => MedicinePriceOption.fromJson(x))
+              .toList(),
+    );
+  }
+
+  /// Convert từ MedicineDetail sang MedicineByType để CartProvider dùng
+  MedicineByType toByType() {
+    return MedicineByType(
+      maThuoc: maThuoc,
+      tenThuoc: tenThuoc,
+      urlAnh: urlAnh,
+      tenNCC: tenNCC,
+      tenLoaiDonVi: null, // Detail API không trả, Cart sẽ lấy từ Option
+      donGiaSi: null, // Detail API không có donGiaSi
+      giaThuocs: giaThuocs,
     );
   }
 }
