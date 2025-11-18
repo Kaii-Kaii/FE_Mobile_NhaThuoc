@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -6,6 +7,7 @@ import '../../services/thuoc_service.dart';
 import '../../models/medicine_detail.dart';
 import '../../models/medicine_price_option.dart';
 import '../../providers/cart_provider.dart';
+import '../../theme/app_theme.dart';
 
 class MedicineDetailScreen extends StatefulWidget {
   final String maThuoc;
@@ -18,7 +20,11 @@ class MedicineDetailScreen extends StatefulWidget {
 
 class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
   final ThuocService _service = ThuocService();
-  final NumberFormat _fmt = NumberFormat.decimalPattern('vi_VN');
+  final NumberFormat _currencyFormatter = NumberFormat.currency(
+    locale: 'vi_VN',
+    symbol: '',
+    decimalDigits: 0,
+  );
 
   MedicineDetail? _detail;
   bool _loading = true;
@@ -40,7 +46,7 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
       final d = await _service.getById(widget.maThuoc);
 
       if (d.giaThuocs.isNotEmpty) {
-        final idx = d.giaThuocs.indexWhere((e) => (e.soLuongCon ?? 0) > 0);
+        final idx = d.giaThuocs.indexWhere((e) => e.soLuongCon > 0);
         _selectedIndex = idx >= 0 ? idx : 0;
       }
 
@@ -76,18 +82,56 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
     final stock = (selected?.soLuongCon ?? 0).toInt();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7F9),
+      extendBodyBehindAppBar: true,
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF023350),
-        title: Text(d.tenThuoc),
+        systemOverlayStyle: SystemUiOverlayStyle.light,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text(
+          d.tenThuoc,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
-      body: Column(
+      body: Stack(
         children: [
-          _buildHeader(d),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: _buildDetailBody(d),
+          Container(
+            height: 320,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  AppTheme.primaryColor,
+                  AppTheme.primaryColor,
+                  Colors.transparent,
+                ],
+                stops: [0, 0.6, 1],
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildHeroHeader(d, selected, stock),
+                        const SizedBox(height: 24),
+                        _buildDetailBody(d),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -97,41 +141,103 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
   }
 
   // ---------------- HEADER ------------------
-  Widget _buildHeader(MedicineDetail d) {
+  Widget _buildHeroHeader(
+    MedicineDetail detail,
+    MedicinePriceOption? selected,
+    int stock,
+  ) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      color: const Color(0xFF023350),
-      child: Row(
-        children: [
-          _buildImage(d),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  d.tenThuoc,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                if (d.tenNCC != null) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    d.tenNCC!,
-                    style: const TextStyle(color: Colors.white70),
-                  ),
-                ],
-                if (d.giaThuocs.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  _buildUnitSelector(d.giaThuocs),
-                ],
-              ],
-            ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 24,
+            offset: const Offset(0, 16),
           ),
         ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildImage(detail),
+                const SizedBox(width: 18),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        detail.tenThuoc,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.textPrimaryColor,
+                        ),
+                      ),
+                      if (detail.tenNCC?.isNotEmpty ?? false)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.verified_outlined,
+                                size: 18,
+                                color: AppTheme.secondaryColor,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  detail.tenNCC!,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: AppTheme.textSecondaryColor,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      if (detail.giaThuocs.isNotEmpty) ...[
+                        const SizedBox(height: 14),
+                        _buildUnitSelector(detail.giaThuocs),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                if (selected != null)
+                  _infoBadge(
+                    icon: Icons.stacked_bar_chart_outlined,
+                    label: 'Quy cách',
+                    value: _formatQuantity(selected.soLuong),
+                  ),
+                _infoBadge(
+                  icon: Icons.inventory_2_outlined,
+                  label: 'Tồn kho',
+                  value:
+                      stock > 0
+                          ? '$stock ${selected?.tenLoaiDonVi.toLowerCase() ?? 'đv'}'
+                          : 'Tạm hết hàng',
+                  highlight: stock <= 0,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -143,23 +249,36 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
             ? img
             : "https://res.cloudinary.com/dmu0nknhg/image/upload/v1761064479/thuoc_images/thuoc/$img";
 
-    return Container(
-      width: 120,
-      height: 120,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        color: Colors.white,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        width: 120,
+        height: 120,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [AppTheme.primaryColor.withOpacity(0.08), Colors.white],
+          ),
+        ),
+        child:
+            img == null || img.isEmpty
+                ? Icon(
+                  Icons.medication_liquid_outlined,
+                  size: 54,
+                  color: AppTheme.secondaryColor,
+                )
+                : Image.network(
+                  url,
+                  fit: BoxFit.cover,
+                  errorBuilder:
+                      (_, __, ___) => Icon(
+                        Icons.broken_image_outlined,
+                        size: 48,
+                        color: Colors.grey[500],
+                      ),
+                ),
       ),
-      clipBehavior: Clip.hardEdge,
-      child:
-          img == null || img.isEmpty
-              ? const Icon(Icons.medication, size: 60, color: Colors.teal)
-              : Image.network(
-                url,
-                fit: BoxFit.cover,
-                errorBuilder:
-                    (_, __, ___) => const Icon(Icons.broken_image, size: 60),
-              ),
     );
   }
 
@@ -169,29 +288,34 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
       return _chipSingle(options.first.tenLoaiDonVi);
     }
 
-    return SizedBox(
-      height: 36,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemCount: options.length,
-        itemBuilder: (_, i) {
-          final op = options[i];
-          final selected = i == _selectedIndex;
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: List.generate(options.length, (i) {
+        final op = options[i];
+        final selected = i == _selectedIndex;
 
-          return ChoiceChip(
-            label: Text(op.tenLoaiDonVi),
-            selected: selected,
-            selectedColor: Colors.white,
-            backgroundColor: Colors.white24,
-            labelStyle: TextStyle(
-              color: selected ? Colors.black : Colors.white,
-              fontWeight: FontWeight.bold,
+        return ChoiceChip(
+          label: Text(op.tenLoaiDonVi),
+          selected: selected,
+          backgroundColor: Colors.grey[200],
+          selectedColor: AppTheme.primaryColor,
+          labelStyle: TextStyle(
+            color: selected ? Colors.white : AppTheme.textPrimaryColor,
+            fontWeight: FontWeight.w600,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+              color:
+                  selected
+                      ? AppTheme.primaryColor
+                      : Colors.grey.withOpacity(0.25),
             ),
-            onSelected: (_) => setState(() => _selectedIndex = i),
-          );
-        },
-      ),
+          ),
+          onSelected: (_) => setState(() => _selectedIndex = i),
+        );
+      }),
     );
   }
 
@@ -199,118 +323,349 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white24,
-        borderRadius: BorderRadius.circular(10),
+        color: AppTheme.primaryColor.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Text(text, style: const TextStyle(color: Colors.white)),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: AppTheme.primaryColor,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 
   // -------- DETAILS --------
   Widget _buildDetailBody(MedicineDetail d) {
+    final sections = [
+      {'title': 'Mô tả', 'content': d.moTa, 'icon': Icons.menu_book_outlined},
+      {
+        'title': 'Thành phần',
+        'content': d.thanhPhan,
+        'icon': Icons.science_outlined,
+      },
+      {
+        'title': 'Công dụng',
+        'content': d.congDung,
+        'icon': Icons.health_and_safety_outlined,
+      },
+      {
+        'title': 'Cách dùng',
+        'content': d.cachDung,
+        'icon': Icons.medical_services_outlined,
+      },
+      {'title': 'Lưu ý', 'content': d.luuY, 'icon': Icons.info_outline},
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _section("Mô tả", d.moTa),
-        _section("Thành phần", d.thanhPhan),
-        _section("Công dụng", d.congDung),
-        _section("Cách dùng", d.cachDung),
-        _section("Lưu ý", d.luuY),
-      ],
+      children:
+          sections
+              .where(
+                (s) => (s['content'] as String?)?.trim().isNotEmpty ?? false,
+              )
+              .map(
+                (s) => Padding(
+                  padding: const EdgeInsets.only(bottom: 18),
+                  child: _detailCard(
+                    title: s['title'] as String,
+                    content: s['content'] as String,
+                    icon: s['icon'] as IconData,
+                  ),
+                ),
+              )
+              .toList(),
     );
   }
 
-  Widget _section(String title, String? content) {
-    if (content == null || content.trim().isEmpty) return const SizedBox();
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+  Widget _detailCard({
+    required String title,
+    required String content,
+    required IconData icon,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
           ),
-          const SizedBox(height: 6),
-          Text(content),
         ],
       ),
-    );
-  }
-
-  // -------- BOTTOM BAR ---------
-  Widget _buildBottom(num price, int stock, MedicinePriceOption? option) {
-    return SafeArea(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
-        ),
-        child: Row(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Text(
-                "${_fmt.format(price)} đ / ${option?.tenLoaiDonVi ?? ''}",
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
             Row(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.remove_circle_outline),
-                  onPressed: _qty > 1 ? () => setState(() => _qty--) : null,
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryColor.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(icon, color: AppTheme.primaryColor, size: 20),
                 ),
-                Text("$_qty", style: const TextStyle(fontSize: 16)),
-                IconButton(
-                  icon: const Icon(Icons.add_circle_outline),
-                  onPressed: () => setState(() => _qty++),
+                const SizedBox(width: 12),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textPrimaryColor,
+                  ),
                 ),
               ],
             ),
-            const SizedBox(width: 12),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.amber,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 14,
-                ),
-              ),
-              onPressed:
-                  option == null
-                      ? null
-                      : () {
-                        final mapped = _detail!.toByType();
-
-                        context.read<CartProvider>().addMedicine(
-                          medicine: mapped,
-                          option: option,
-                          quantity: _qty,
-                        );
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              "Đã thêm ${mapped.tenThuoc} (${option.tenLoaiDonVi}) x$_qty",
-                            ),
-                          ),
-                        );
-                      },
-              child: const Text(
-                "Thêm vào giỏ",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+            const SizedBox(height: 12),
+            Text(
+              content,
+              style: TextStyle(
+                fontSize: 14,
+                height: 1.6,
+                color: AppTheme.textSecondaryColor,
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  // -------- BOTTOM BAR ---------
+  Widget _buildBottom(num price, int stock, MedicinePriceOption? option) {
+    final isOutOfStock = stock <= 0;
+
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 22),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 20,
+              offset: const Offset(0, -8),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Giá hiện tại',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppTheme.textSecondaryColor,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        option == null
+                            ? 'Chưa có thông tin giá'
+                            : '${_formatCurrency(price)} / ${option.tenLoaiDonVi}',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color:
+                              isOutOfStock
+                                  ? Colors.grey[500]
+                                  : AppTheme.secondaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (option != null)
+                  Text(
+                    'Còn lại: $stock',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color:
+                          isOutOfStock
+                              ? Colors.redAccent
+                              : AppTheme.textSecondaryColor,
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                _quantityStepper(enabled: option != null && !isOutOfStock),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          isOutOfStock
+                              ? Colors.grey[300]
+                              : AppTheme.secondaryColor,
+                      foregroundColor:
+                          isOutOfStock ? Colors.grey[700] : Colors.white,
+                      elevation: isOutOfStock ? 0 : 4,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    onPressed:
+                        (option == null || isOutOfStock)
+                            ? null
+                            : () {
+                              final mapped = _detail!.toByType();
+
+                              context.read<CartProvider>().addMedicine(
+                                medicine: mapped,
+                                option: option,
+                                quantity: _qty,
+                              );
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Đã thêm ${mapped.tenThuoc} (${option.tenLoaiDonVi}) x$_qty',
+                                  ),
+                                ),
+                              );
+                            },
+                    child: Text(
+                      isOutOfStock ? 'Tạm hết hàng' : 'Thêm vào giỏ',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _quantityStepper({required bool enabled}) {
+    return Container(
+      decoration: BoxDecoration(
+        color:
+            enabled
+                ? AppTheme.primaryColor.withOpacity(0.08)
+                : Colors.grey[200],
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          _stepperButton(
+            icon: Icons.remove_rounded,
+            onTap: enabled && _qty > 1 ? () => setState(() => _qty--) : null,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            child: Text(
+              '$_qty',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            ),
+          ),
+          _stepperButton(
+            icon: Icons.add_rounded,
+            onTap: enabled ? () => setState(() => _qty++) : null,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _stepperButton({required IconData icon, VoidCallback? onTap}) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Icon(
+            icon,
+            size: 20,
+            color: onTap == null ? Colors.grey[400] : AppTheme.primaryColor,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _infoBadge({
+    required IconData icon,
+    required String label,
+    required String value,
+    bool highlight = false,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color:
+            highlight
+                ? Colors.redAccent.withOpacity(0.12)
+                : AppTheme.primaryColor.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(16),
+      ),
+
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 18,
+            color: highlight ? Colors.redAccent : AppTheme.primaryColor,
+          ),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  color:
+                      highlight
+                          ? Colors.redAccent
+                          : AppTheme.textSecondaryColor,
+                ),
+              ),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color:
+                      highlight ? Colors.redAccent : AppTheme.textPrimaryColor,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatQuantity(double value) {
+    final isInt = value % 1 == 0;
+    return isInt ? value.toInt().toString() : value.toStringAsFixed(1);
+  }
+
+  String _formatCurrency(num value) {
+    return '${_currencyFormatter.format(value).trim()} đ';
   }
 }
