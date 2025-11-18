@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../models/order_request.dart';
 import '../../providers/cart_provider.dart';
+import '../../providers/customer_provider.dart';
+import '../../screens/payments/payment_webview_screen.dart';
+import '../../services/payment_service.dart';
 import '../../theme/app_theme.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
+
+  static const int _shippingFee = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -202,7 +208,7 @@ class CartScreen extends StatelessWidget {
   // ---------------- SUMMARY -------------------
   Widget _buildSummary(BuildContext context, CartProvider cart) {
     final total = cart.totalAmount.toInt();
-    const shipping = 15000;
+    const shipping = _shippingFee;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -237,7 +243,7 @@ class CartScreen extends StatelessWidget {
                 backgroundColor: AppTheme.primaryColor,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              onPressed: () {},
+              onPressed: () => _handleCheckout(context),
               child: const Text(
                 "Tiến hành thanh toán",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -274,4 +280,105 @@ class CartScreen extends StatelessWidget {
       ),
     );
   }
+
+    Future<void> _handleCheckout(BuildContext context) async {
+      final cart = context.read<CartProvider>();
+      if (cart.items.isEmpty) {
+        _showSnack(context, 'Giỏ hàng của bạn đang trống.');
+        return;
+      }
+
+      final customer = context.read<CustomerProvider>().customer;
+      if (customer == null) {
+        _showSnack(context, 'Vui lòng cập nhật thông tin khách hàng trước khi thanh toán.');
+        return;
+      }
+
+      final total = cart.totalAmount.toInt();
+      final amount = total + _shippingFee;
+
+      final orderItems = cart.items.map((item) {
+        final price = item.price.round();
+        return OnlineOrderItem(
+          medicineId: item.medicineId,
+          unitId: item.unitId ?? '',
+          quantity: item.quantity,
+          price: price,
+        );
+      }).toList();
+
+      final orderRequest = OnlineOrderRequest(
+        customerId: customer.maKH,
+        totalAmount: amount,
+        items: orderItems,
+        note: 'Thanh toán online',
+      );
+
+      final paymentService = PaymentService();
+
+      var loadingVisible = false;
+      if (context.mounted) {
+        loadingVisible = true;
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) {
+            return const Center(child: CircularProgressIndicator());
+          },
+        );
+      }
+
+      try {
+        final paymentResponse = await paymentService.createSimplePayment(
+          amount: amount,
+          description: 'Thanh toán đơn hàng',
+          returnUrl: PaymentService.successRedirectUrl,
+          cancelUrl: PaymentService.cancelRedirectUrl,
+        );
+
+        if (loadingVisible && context.mounted) {
+          Navigator.of(context, rootNavigator: true).pop();
+          loadingVisible = false;
+        }
+
+        if (!context.mounted) return;
+
+        if (!paymentResponse.success ||
+            paymentResponse.paymentUrl.isEmpty ||
+            paymentResponse.orderCode.isEmpty) {
+          final message = paymentResponse.message ??
+              'Không thể khởi tạo thanh toán. Vui lòng thử lại sau.';
+          _showSnack(context, message);
+          return;
+        }
+
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => PaymentWebViewScreen(
+              paymentUrl: paymentResponse.paymentUrl,
+              orderCode: paymentResponse.orderCode,
+              returnUrl: PaymentService.successRedirectUrl,
+              cancelUrl: PaymentService.cancelRedirectUrl,
+              orderRequest: orderRequest,
+            ),
+          ),
+        );
+      } catch (e) {
+        if (loadingVisible && context.mounted) {
+          Navigator.of(context, rootNavigator: true).pop();
+          loadingVisible = false;
+        }
+        if (!context.mounted) return;
+        _showSnack(
+          context,
+          e.toString().replaceFirst('Exception: ', ''),
+        );
+      }
+    }
+
+    void _showSnack(BuildContext context, String message) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    }
 }

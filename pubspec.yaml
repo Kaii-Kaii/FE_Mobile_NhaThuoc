@@ -36,6 +36,7 @@ dependencies:
   intl: ^0.18.1 # Date formatting
   font_awesome_flutter: ^10.6.0 # Icons
   flutter_svg: ^2.0.9 # SVG support
+  webview_flutter: ^4.4.1 # In-app payment webview
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
