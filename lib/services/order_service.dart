@@ -8,10 +8,7 @@ class OrderService {
 
   Future<void> createOnlineOrder(OnlineOrderRequest request) async {
     try {
-      await _apiService.post(
-        '/HoaDon/CreateOnline',
-        data: request.toJson(),
-      );
+      await _apiService.post('/HoaDon/CreateOnline', data: request.toJson());
     } catch (e) {
       throw Exception(ApiService.handleError(e));
     }

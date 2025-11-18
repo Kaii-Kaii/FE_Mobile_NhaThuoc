@@ -40,26 +40,27 @@ class _PaymentWebViewScreenState extends State<PaymentWebViewScreen> {
   void initState() {
     super.initState();
 
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.white)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onNavigationRequest: (request) {
-            final url = request.url;
-            if (url.startsWith(widget.returnUrl)) {
-              _handleResult(success: true);
-              return NavigationDecision.prevent;
-            }
-            if (url.startsWith(widget.cancelUrl)) {
-              _handleResult(success: false);
-              return NavigationDecision.prevent;
-            }
-            return NavigationDecision.navigate;
-          },
-        ),
-      )
-      ..loadRequest(Uri.parse(widget.paymentUrl));
+    _controller =
+        WebViewController()
+          ..setJavaScriptMode(JavaScriptMode.unrestricted)
+          ..setBackgroundColor(Colors.white)
+          ..setNavigationDelegate(
+            NavigationDelegate(
+              onNavigationRequest: (request) {
+                final url = request.url;
+                if (url.startsWith(widget.returnUrl)) {
+                  _handleResult(success: true);
+                  return NavigationDecision.prevent;
+                }
+                if (url.startsWith(widget.cancelUrl)) {
+                  _handleResult(success: false);
+                  return NavigationDecision.prevent;
+                }
+                return NavigationDecision.navigate;
+              },
+            ),
+          )
+          ..loadRequest(Uri.parse(widget.paymentUrl));
   }
 
   Future<void> _handleResult({required bool success}) async {
@@ -89,21 +90,20 @@ class _PaymentWebViewScreenState extends State<PaymentWebViewScreen> {
       _goToResultScreen(true, 'Đơn hàng của bạn đã được tạo thành công.');
     } catch (e) {
       if (!mounted) return;
-      _goToResultScreen(
-        false,
-        e.toString().replaceFirst('Exception: ', ''),
-      );
+      _goToResultScreen(false, e.toString().replaceFirst('Exception: ', ''));
     }
   }
 
   void _goToResultScreen(bool isSuccess, String message) {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => PaymentResultScreen(
-          isSuccess: isSuccess,
-          title: isSuccess ? 'Thanh toán thành công' : 'Thanh toán thất bại',
-          message: message,
-        ),
+        builder:
+            (_) => PaymentResultScreen(
+              isSuccess: isSuccess,
+              title:
+                  isSuccess ? 'Thanh toán thành công' : 'Thanh toán thất bại',
+              message: message,
+            ),
       ),
     );
   }
@@ -121,9 +121,7 @@ class _PaymentWebViewScreenState extends State<PaymentWebViewScreen> {
           if (_isProcessing)
             Container(
               color: Colors.black.withOpacity(0.3),
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
+              child: const Center(child: CircularProgressIndicator()),
             ),
         ],
       ),

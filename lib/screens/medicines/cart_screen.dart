@@ -281,104 +281,107 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-    Future<void> _handleCheckout(BuildContext context) async {
-      final cart = context.read<CartProvider>();
-      if (cart.items.isEmpty) {
-        _showSnack(context, 'Giỏ hàng của bạn đang trống.');
+  Future<void> _handleCheckout(BuildContext context) async {
+    final cart = context.read<CartProvider>();
+    if (cart.items.isEmpty) {
+      _showSnack(context, 'Giỏ hàng của bạn đang trống.');
+      return;
+    }
+
+    final customer = context.read<CustomerProvider>().customer;
+    if (customer == null) {
+      _showSnack(
+        context,
+        'Vui lòng cập nhật thông tin khách hàng trước khi thanh toán.',
+      );
+      return;
+    }
+
+    final total = cart.totalAmount.toInt();
+    final amount = total + _shippingFee;
+
+    final orderItems =
+        cart.items.map((item) {
+          final price = item.price.round();
+          return OnlineOrderItem(
+            medicineId: item.medicineId,
+            unitId: item.unitId ?? '',
+            quantity: item.quantity,
+            price: price,
+          );
+        }).toList();
+
+    final orderRequest = OnlineOrderRequest(
+      customerId: customer.maKH,
+      totalAmount: amount,
+      items: orderItems,
+      note: 'Thanh toán online',
+    );
+
+    final paymentService = PaymentService();
+
+    var loadingVisible = false;
+    if (context.mounted) {
+      loadingVisible = true;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) {
+          return const Center(child: CircularProgressIndicator());
+        },
+      );
+    }
+
+    try {
+      final paymentResponse = await paymentService.createSimplePayment(
+        amount: amount,
+        description: 'Thanh toán đơn hàng',
+        returnUrl: PaymentService.successRedirectUrl,
+        cancelUrl: PaymentService.cancelRedirectUrl,
+      );
+
+      if (loadingVisible && context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+        loadingVisible = false;
+      }
+
+      if (!context.mounted) return;
+
+      if (!paymentResponse.success ||
+          paymentResponse.paymentUrl.isEmpty ||
+          paymentResponse.orderCode.isEmpty) {
+        final message =
+            paymentResponse.message ??
+            'Không thể khởi tạo thanh toán. Vui lòng thử lại sau.';
+        _showSnack(context, message);
         return;
       }
 
-      final customer = context.read<CustomerProvider>().customer;
-      if (customer == null) {
-        _showSnack(context, 'Vui lòng cập nhật thông tin khách hàng trước khi thanh toán.');
-        return;
-      }
-
-      final total = cart.totalAmount.toInt();
-      final amount = total + _shippingFee;
-
-      final orderItems = cart.items.map((item) {
-        final price = item.price.round();
-        return OnlineOrderItem(
-          medicineId: item.medicineId,
-          unitId: item.unitId ?? '',
-          quantity: item.quantity,
-          price: price,
-        );
-      }).toList();
-
-      final orderRequest = OnlineOrderRequest(
-        customerId: customer.maKH,
-        totalAmount: amount,
-        items: orderItems,
-        note: 'Thanh toán online',
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder:
+              (_) => PaymentWebViewScreen(
+                paymentUrl: paymentResponse.paymentUrl,
+                orderCode: paymentResponse.orderCode,
+                returnUrl: PaymentService.successRedirectUrl,
+                cancelUrl: PaymentService.cancelRedirectUrl,
+                orderRequest: orderRequest,
+              ),
+        ),
       );
-
-      final paymentService = PaymentService();
-
-      var loadingVisible = false;
-      if (context.mounted) {
-        loadingVisible = true;
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (_) {
-            return const Center(child: CircularProgressIndicator());
-          },
-        );
+    } catch (e) {
+      if (loadingVisible && context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+        loadingVisible = false;
       }
-
-      try {
-        final paymentResponse = await paymentService.createSimplePayment(
-          amount: amount,
-          description: 'Thanh toán đơn hàng',
-          returnUrl: PaymentService.successRedirectUrl,
-          cancelUrl: PaymentService.cancelRedirectUrl,
-        );
-
-        if (loadingVisible && context.mounted) {
-          Navigator.of(context, rootNavigator: true).pop();
-          loadingVisible = false;
-        }
-
-        if (!context.mounted) return;
-
-        if (!paymentResponse.success ||
-            paymentResponse.paymentUrl.isEmpty ||
-            paymentResponse.orderCode.isEmpty) {
-          final message = paymentResponse.message ??
-              'Không thể khởi tạo thanh toán. Vui lòng thử lại sau.';
-          _showSnack(context, message);
-          return;
-        }
-
-        await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => PaymentWebViewScreen(
-              paymentUrl: paymentResponse.paymentUrl,
-              orderCode: paymentResponse.orderCode,
-              returnUrl: PaymentService.successRedirectUrl,
-              cancelUrl: PaymentService.cancelRedirectUrl,
-              orderRequest: orderRequest,
-            ),
-          ),
-        );
-      } catch (e) {
-        if (loadingVisible && context.mounted) {
-          Navigator.of(context, rootNavigator: true).pop();
-          loadingVisible = false;
-        }
-        if (!context.mounted) return;
-        _showSnack(
-          context,
-          e.toString().replaceFirst('Exception: ', ''),
-        );
-      }
+      if (!context.mounted) return;
+      _showSnack(context, e.toString().replaceFirst('Exception: ', ''));
     }
+  }
 
-    void _showSnack(BuildContext context, String message) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
-    }
+  void _showSnack(BuildContext context, String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
 }
