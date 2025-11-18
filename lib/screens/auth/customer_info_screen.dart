@@ -26,6 +26,26 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
 
   DateTime? _selectedDate;
   String _selectedGender = 'Nam';
+  String? _redirectRoute;
+  bool _didLoadArgs = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didLoadArgs) return;
+
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Map<String, dynamic>) {
+      final redirect = args['redirectRoute'];
+      if (redirect is String && redirect.isNotEmpty) {
+        _redirectRoute = redirect;
+      }
+    } else if (args is String && args.isNotEmpty) {
+      _redirectRoute = args;
+    }
+
+    _didLoadArgs = true;
+  }
 
   @override
   void dispose() {
@@ -171,9 +191,13 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
                   text: 'Tiếp tục',
                   onPressed: () {
                     Navigator.of(context).pop();
-                    Navigator.of(
-                      context,
-                    ).pushReplacementNamed(AppConstants.homeRoute);
+                    final targetRoute =
+                        (_redirectRoute == null ||
+                                _redirectRoute ==
+                                    AppConstants.customerInfoRoute)
+                            ? AppConstants.homeRoute
+                            : _redirectRoute!;
+                    Navigator.of(context).pushReplacementNamed(targetRoute);
                   },
                 ),
               ],

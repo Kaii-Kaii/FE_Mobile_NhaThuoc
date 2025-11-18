@@ -4,6 +4,7 @@ import '../../widgets/app_bottom_nav.dart';
 import '../medicines/family_medicine_screen.dart';
 import '../medicines/trusted_brand_screen.dart';
 import '../medicines/medicine_list_screen.dart';
+import 'account_screen.dart';
 import 'category_screen.dart';
 
 class HomePageScreen extends StatefulWidget {
@@ -84,6 +85,19 @@ class _HomePageScreenState extends State<HomePageScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const CategoryScreen()),
+            );
+            return;
+          }
+          if (index == 3) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AccountScreen()),
+            );
+            return;
+          }
+          if (index == 2) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Chức năng đang phát triển.')),
             );
             return;
           }

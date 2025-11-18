@@ -84,7 +84,7 @@ class CustomerProvider with ChangeNotifier {
   }
 
   /// Get customer by ID
-  Future<bool> getCustomer(int id) async {
+  Future<bool> getCustomer(String id) async {
     try {
       _isLoading = true;
       _errorMessage = null;
@@ -106,6 +106,7 @@ class CustomerProvider with ChangeNotifier {
       return true;
     } catch (e) {
       _isLoading = false;
+      _customer = null;
       _errorMessage = e.toString().replaceAll('Exception: ', '');
       notifyListeners();
 
@@ -147,6 +148,7 @@ class CustomerProvider with ChangeNotifier {
   Future<void> clearCustomer() async {
     try {
       _customer = null;
+      _errorMessage = null;
       await StorageHelper.remove(AppConstants.customerKey);
       notifyListeners();
     } catch (e) {

@@ -69,4 +69,5 @@ class AppConstants {
   static const String registerRoute = '/register';
   static const String customerInfoRoute = '/customer-info';
   static const String homeRoute = '/home';
+  static const String accountRoute = '/account';
 }

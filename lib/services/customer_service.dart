@@ -50,7 +50,7 @@ class CustomerService {
   ///
   /// Returns [CustomerModel] nếu thành công
   /// Throws [Exception] nếu thất bại
-  Future<CustomerModel> getCustomer(int id) async {
+  Future<CustomerModel> getCustomer(String id) async {
     try {
       final response = await _apiService.get(
         '${AppConstants.customerEndpoint}/$id',

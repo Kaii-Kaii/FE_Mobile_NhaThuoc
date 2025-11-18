@@ -41,7 +41,12 @@ class HomeScreen extends StatelessWidget {
 
     if (confirmed == true) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final customerProvider = Provider.of<CustomerProvider>(
+        context,
+        listen: false,
+      );
       await authProvider.logout();
+      await customerProvider.clearCustomer();
 
       if (context.mounted) {
         Navigator.of(context).pushReplacementNamed(AppConstants.loginRoute);

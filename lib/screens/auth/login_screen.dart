@@ -23,6 +23,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _rememberMe = false;
+  String? _redirectRoute;
+  bool _didLoadRouteArgs = false;
 
   @override
   void initState() {
@@ -34,6 +36,24 @@ class _LoginScreenState extends State<LoginScreen> {
         _rememberMe = authProvider.rememberMe;
       });
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didLoadRouteArgs) return;
+
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Map<String, dynamic>) {
+      final redirect = args['redirectRoute'];
+      if (redirect is String && redirect.isNotEmpty) {
+        _redirectRoute = redirect;
+      }
+    } else if (args is String && args.isNotEmpty) {
+      _redirectRoute = args;
+    }
+
+    _didLoadRouteArgs = true;
   }
 
   @override
@@ -71,18 +91,43 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (success) {
-      // Reload customer data
-      await customerProvider.loadCustomer();
+      // Clear any cached customer data to avoid stale info between accounts
+      await customerProvider.clearCustomer();
 
-      // Navigate based on customer info
-      if (customerProvider.hasCustomerInfo) {
-        // Has customer info -> Go to home
-        Navigator.of(context).pushReplacementNamed(AppConstants.homeRoute);
+      bool hasCustomerInfo = false;
+      final loggedInUser = authProvider.user;
+
+      if (loggedInUser?.maKhachHang != null) {
+        final fetched = await customerProvider.getCustomer(
+          loggedInUser!.maKhachHang!,
+        );
+
+        if (!fetched && customerProvider.errorMessage != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(customerProvider.errorMessage!),
+              backgroundColor: AppTheme.errorColor,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+
+        hasCustomerInfo = fetched && customerProvider.customer != null;
+      }
+
+      final redirectRoute =
+          (_redirectRoute == AppConstants.customerInfoRoute ||
+                  _redirectRoute == null)
+              ? AppConstants.homeRoute
+              : _redirectRoute!;
+
+      if (hasCustomerInfo) {
+        Navigator.of(context).pushReplacementNamed(redirectRoute);
       } else {
-        // No customer info -> Go to customer info screen
-        Navigator.of(
-          context,
-        ).pushReplacementNamed(AppConstants.customerInfoRoute);
+        Navigator.of(context).pushReplacementNamed(
+          AppConstants.customerInfoRoute,
+          arguments: {"redirectRoute": redirectRoute},
+        );
       }
     } else {
       // Show error message
