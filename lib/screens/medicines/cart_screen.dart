@@ -31,36 +31,23 @@ class CartScreen extends StatelessWidget {
         title: const Text("Giỏ hàng"),
       ),
       body: SafeArea(
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                AppTheme.primaryColor.withOpacity(0.05),
-                AppTheme.backgroundColor,
-              ],
-            ),
-          ),
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 250),
-            child:
-                items.isEmpty
-                    ? _buildEmptyCart(context)
-                    : Column(
-                      key: const ValueKey('cart_loaded'),
-                      children: [
-                        Expanded(child: _buildItemList(context, cart)),
-                        _buildSummary(context, cart),
-                      ],
-                    ),
-          ),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          child:
+              items.isEmpty
+                  ? _buildEmptyCart(context)
+                  : Column(
+                    children: [
+                      Expanded(child: _buildItemList(context, cart)),
+                      _buildSummary(context, cart),
+                    ],
+                  ),
         ),
       ),
     );
   }
 
-  // ---------------- EMPTY ------------------
+  // EMPTY CART UI
   Widget _buildEmptyCart(BuildContext context) {
     return Center(
       child: Column(
@@ -83,7 +70,6 @@ class CartScreen extends StatelessWidget {
           const SizedBox(height: 10),
           Text("Hãy thêm sản phẩm vào giỏ"),
           const SizedBox(height: 20),
-
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.primaryColor,
@@ -97,340 +83,198 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  // ---------------- LIST -------------------
+  // LIST
   Widget _buildItemList(BuildContext context, CartProvider cart) {
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemCount: cart.items.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 4),
-      itemBuilder: (_, index) {
-        final item = cart.items[index];
-        return _buildItem(context, cart, item);
-      },
+      itemBuilder: (_, i) => _buildItem(context, cart, cart.items[i]),
     );
   }
 
+  // ITEM CARD
   Widget _buildItem(BuildContext context, CartProvider cart, CartEntry item) {
-    final imageUrl =
-        (item.rawImageUrl != null &&
-                (item.rawImageUrl!.startsWith("http") ||
-                    item.rawImageUrl!.startsWith("https")))
+    final img =
+        (item.rawImageUrl?.startsWith("http") == true)
             ? item.rawImageUrl!
             : "https://res.cloudinary.com/dmu0nknhg/image/upload/v1761064479/thuoc_images/thuoc/${item.rawImageUrl}";
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Colors.white, AppTheme.primaryColor.withOpacity(0.04)],
-        ),
+        color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Stack(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(14),
-            child: Row(
+          _buildItemImage(img),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildItemImage(imageUrl),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.name,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                        ),
-                      ),
-                      if (item.supplierName?.isNotEmpty ?? false)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text(
-                            item.supplierName!,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ),
-                      const SizedBox(height: 10),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 6,
-                        children: [
-                          Chip(
-                            backgroundColor: AppTheme.primaryColor.withOpacity(
-                              0.08,
-                            ),
-                            label: Text(
-                              item.unitName,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: AppTheme.primaryColor,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          if (item.unitQuantity != null)
-                            Chip(
-                              backgroundColor: Colors.grey[100],
-                              label: Text(
-                                'SL/Hộp: ${item.unitQuantity}',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[700],
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 14),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Đơn giá',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  _formatCurrency(item.price),
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: AppTheme.secondaryColor,
-                                  ),
-                                ),
-                                if (item.quantity > 1) ...[
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Tổng: ${_formatCurrency(item.totalPrice)}',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.grey[700],
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                          _buildQuantityStepper(cart, item),
-                        ],
-                      ),
-                    ],
+                Text(
+                  item.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
                 ),
+
+                if ((item.supplierName ?? "").isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      item.supplierName!,
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
+                  ),
+
+                const SizedBox(height: 10),
+
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    Chip(
+                      label: Text(
+                        item.unitName ?? "Đơn vị",
+                        style: TextStyle(
+                          color: AppTheme.primaryColor,
+                          fontSize: 12,
+                        ),
+                      ),
+                      backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
+                    ),
+                    if (item.unitQuantity != null)
+                      Chip(
+                        label: Text(
+                          "SL/Hộp: ${item.unitQuantity}",
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ),
+                  ],
+                ),
+
+                const SizedBox(height: 12),
+
+                Text(
+                  "Đơn giá",
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
+                Text(
+                  _formatCurrency(item.price ?? 0),
+                  style: TextStyle(
+                    color: AppTheme.secondaryColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+
+                if (item.quantity > 1)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      "Tổng: ${_formatCurrency((item.totalPrice ?? 0))}",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[700],
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
-          Positioned(
-            top: 6,
-            right: 6,
-            child: Material(
-              color: Colors.white,
-              shape: const CircleBorder(),
-              elevation: 2,
-              shadowColor: Colors.black.withOpacity(0.1),
-              child: IconButton(
-                tooltip: 'Xoá khỏi giỏ',
-                icon: const Icon(Icons.close_rounded, size: 18),
-                onPressed: () => cart.removeItem(item.key),
-              ),
-            ),
-          ),
+
+          // QUANTITY
+          _buildQuantityStepper(cart, item),
         ],
       ),
     );
   }
 
-  Widget _buildItemImage(String imageUrl) {
+  Widget _buildItemImage(String url) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        width: 110,
-        height: 110,
-        color: Colors.white,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppTheme.primaryColor.withOpacity(0.2),
-                      Colors.white,
-                    ],
-                  ),
-                ),
-              ),
+      borderRadius: BorderRadius.circular(14),
+      child: Image.network(
+        url,
+        width: 100,
+        height: 100,
+        fit: BoxFit.cover,
+        errorBuilder:
+            (_, __, ___) => Container(
+              color: Colors.grey[200],
+              width: 100,
+              height: 100,
+              alignment: Alignment.center,
+              child: Icon(Icons.broken_image, color: Colors.grey[500]),
             ),
-            Image.network(
-              imageUrl,
-              fit: BoxFit.cover,
-              errorBuilder:
-                  (_, __, ___) => Container(
-                    color: Colors.grey[200],
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.broken_image,
-                      size: 36,
-                      color: Colors.grey[500],
-                    ),
-                  ),
-            ),
-          ],
-        ),
       ),
     );
   }
 
   Widget _buildQuantityStepper(CartProvider cart, CartEntry item) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.primaryColor.withOpacity(0.07),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _qtyBtn(
-            icon: Icons.remove_rounded,
-            onTap: () => cart.updateQuantity(item.key, item.quantity - 1),
-          ),
-          Container(
-            alignment: Alignment.center,
-            width: 34,
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Text(
-              '${item.quantity}',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-            ),
-          ),
-          _qtyBtn(
-            icon: Icons.add_rounded,
-            onTap: () => cart.updateQuantity(item.key, item.quantity + 1),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _qtyBtn({required IconData icon, required VoidCallback onTap}) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Icon(icon, size: 18, color: AppTheme.primaryColor),
+    return Column(
+      children: [
+        IconButton(
+          icon: const Icon(Icons.add_circle_outline),
+          onPressed: () => cart.updateQuantity(item.key, item.quantity + 1),
         ),
-      ),
+        Text(
+          "${item.quantity}",
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+        ),
+        IconButton(
+          icon: const Icon(Icons.remove_circle_outline),
+          onPressed: () => cart.updateQuantity(item.key, item.quantity - 1),
+        ),
+      ],
     );
   }
 
-  // ---------------- SUMMARY -------------------
+  // SUMMARY
   Widget _buildSummary(BuildContext context, CartProvider cart) {
-    final total = cart.totalAmount;
+    final total = (cart.totalAmount ?? 0).toInt();
     const shipping = _shippingFee;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 20, 24, 28),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.all(20),
+      decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 18,
-            offset: const Offset(0, -6),
-          ),
-        ],
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
       ),
-
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Text(
-                "Thông tin đơn hàng",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryColor.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  '${cart.items.length} sản phẩm',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppTheme.primaryColor,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
           _row("Tạm tính", _formatCurrency(total)),
           _row("Phí vận chuyển", _formatCurrency(shipping)),
-
-          const Divider(height: 28),
+          const Divider(height: 30),
           _row("Tổng cộng", _formatCurrency(total + shipping), bold: true),
 
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryColor,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
+          const SizedBox(height: 16),
+
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryColor,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
-              onPressed: () => _handleCheckout(context),
-              child: const Text(
-                "Tiến hành thanh toán",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
+            ),
+            onPressed: () => _handleCheckout(context),
+            child: const Text(
+              "Tiến hành thanh toán",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ),
         ],
@@ -439,61 +283,56 @@ class CartScreen extends StatelessWidget {
   }
 
   Widget _row(String label, String value, {bool bold = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-              fontSize: bold ? 18 : 16,
-            ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: bold ? 18 : 16,
+            fontWeight: bold ? FontWeight.bold : FontWeight.normal,
           ),
-          Text(
-            value,
-            style: TextStyle(
-              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-              fontSize: bold ? 18 : 16,
-              color: AppTheme.secondaryColor,
-            ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: bold ? 18 : 16,
+            color: AppTheme.secondaryColor,
+            fontWeight: bold ? FontWeight.bold : FontWeight.normal,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  String _formatCurrency(num? value) {
-    final safeValue = value ?? 0;
-    return '${_currencyFormatter.format(safeValue).trim()} đ';
+  String _formatCurrency(num value) {
+    return '${_currencyFormatter.format(value)} đ';
   }
 
+  // CHECKOUT
   Future<void> _handleCheckout(BuildContext context) async {
     final cart = context.read<CartProvider>();
+
     if (cart.items.isEmpty) {
-      _showSnack(context, 'Giỏ hàng của bạn đang trống.');
+      _showSnack(context, "Giỏ hàng đang trống.");
       return;
     }
 
     final customer = context.read<CustomerProvider>().customer;
     if (customer == null) {
-      _showSnack(
-        context,
-        'Vui lòng cập nhật thông tin khách hàng trước khi thanh toán.',
-      );
+      _showSnack(context, "Vui lòng cập nhật thông tin khách hàng.");
       return;
     }
 
-    final total = cart.totalAmount.toInt();
+    final total = (cart.totalAmount ?? 0).toInt();
     final amount = total + _shippingFee;
 
     final orderItems =
         cart.items.map((item) {
-          final price = item.price.round();
+          final price = (item.price ?? 0).round();
           return OnlineOrderItem(
             medicineId: item.medicineId,
-            unitId: item.unitId ?? '',
+            unitId: item.unitId ?? "",
             quantity: item.quantity,
             price: price,
           );
@@ -503,54 +342,39 @@ class CartScreen extends StatelessWidget {
       customerId: customer.maKH,
       totalAmount: amount,
       items: orderItems,
-      note: 'Thanh toán online',
+      note: "Thanh toán online",
     );
 
-    final paymentService = PaymentService();
-
-    var loadingVisible = false;
-    if (context.mounted) {
-      loadingVisible = true;
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) {
-          return const Center(child: CircularProgressIndicator());
-        },
-      );
-    }
+    // loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
 
     try {
-      final paymentResponse = await paymentService.createSimplePayment(
+      final paymentService = PaymentService();
+      final resp = await paymentService.createSimplePayment(
         amount: amount,
-        description: 'Thanh toán đơn hàng',
+        description: "Thanh toán đơn hàng",
         returnUrl: PaymentService.successRedirectUrl,
         cancelUrl: PaymentService.cancelRedirectUrl,
       );
 
-      if (loadingVisible && context.mounted) {
-        Navigator.of(context, rootNavigator: true).pop();
-        loadingVisible = false;
-      }
+      Navigator.pop(context);
 
-      if (!context.mounted) return;
-
-      if (!paymentResponse.success ||
-          paymentResponse.paymentUrl.isEmpty ||
-          paymentResponse.orderCode.isEmpty) {
-        final message =
-            paymentResponse.message ??
-            'Không thể khởi tạo thanh toán. Vui lòng thử lại sau.';
-        _showSnack(context, message);
+      if (!resp.success || resp.paymentUrl.isEmpty || resp.orderCode.isEmpty) {
+        _showSnack(context, resp.message ?? "Lỗi tạo thanh toán.");
         return;
       }
 
-      await Navigator.of(context).push(
+      await Navigator.push(
+        context,
         MaterialPageRoute(
           builder:
               (_) => PaymentWebViewScreen(
-                paymentUrl: paymentResponse.paymentUrl,
-                orderCode: paymentResponse.orderCode,
+                paymentUrl: resp.paymentUrl,
+                orderCode: resp.orderCode,
                 returnUrl: PaymentService.successRedirectUrl,
                 cancelUrl: PaymentService.cancelRedirectUrl,
                 orderRequest: orderRequest,
@@ -558,18 +382,12 @@ class CartScreen extends StatelessWidget {
         ),
       );
     } catch (e) {
-      if (loadingVisible && context.mounted) {
-        Navigator.of(context, rootNavigator: true).pop();
-        loadingVisible = false;
-      }
-      if (!context.mounted) return;
-      _showSnack(context, e.toString().replaceFirst('Exception: ', ''));
+      Navigator.pop(context);
+      _showSnack(context, e.toString());
     }
   }
 
-  void _showSnack(BuildContext context, String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+  void _showSnack(BuildContext context, String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 }

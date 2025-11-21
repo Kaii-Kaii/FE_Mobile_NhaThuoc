@@ -17,14 +17,16 @@ class SimplePaymentCreateResponse {
     final data = json['data'] as Map<String, dynamic>? ?? {};
     final statusFlag = json['status'];
 
+    final rawAmount = data['amount'];
+
     return SimplePaymentCreateResponse(
       success: data['success'] == true || statusFlag == 1,
       paymentUrl: (data['paymentUrl'] ?? '') as String,
       orderCode: (data['orderCode'] ?? '') as String,
       amount:
-          (data['amount'] ?? 0) is num
-              ? (data['amount'] as num).toInt()
-              : int.tryParse('${data['amount']}') ?? 0,
+          rawAmount is num
+              ? rawAmount.toInt()
+              : int.tryParse('$rawAmount') ?? 0,
       message: (data['message'] ?? json['message']) as String?,
     );
   }
@@ -49,14 +51,16 @@ class SimplePaymentStatusResponse {
     final data = json['data'] as Map<String, dynamic>? ?? {};
     final statusFlag = json['status'];
 
+    final rawAmount = data['amount'];
+
     return SimplePaymentStatusResponse(
       orderCode: (data['orderCode'] ?? '') as String,
       status: (data['status'] ?? '') as String,
       isPaid: data['isPaid'] == true || statusFlag == 1,
       amount:
-          (data['amount'] ?? 0) is num
-              ? (data['amount'] as num).toInt()
-              : int.tryParse('${data['amount']}') ?? 0,
+          rawAmount is num
+              ? rawAmount.toInt()
+              : int.tryParse('$rawAmount') ?? 0,
       message: (data['message'] ?? json['message']) as String?,
     );
   }
