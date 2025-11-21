@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quan_ly_nha_thuoc/screens/home/home_page_screen.dart';
-// SearchScreen import removed (unused here)
-// SearchScreen import removed (unused here)
-import 'package:quan_ly_nha_thuoc/widgets/app_bottom_nav.dart';
-import 'package:quan_ly_nha_thuoc/models/categoryGroup/CategoryGroup_service.dart';
 import 'package:quan_ly_nha_thuoc/models/categoryGroup/CategoryGroup.dart';
+import 'package:quan_ly_nha_thuoc/models/categoryGroup/CategoryGroup_service.dart';
 import 'package:quan_ly_nha_thuoc/models/categoryGroup/CategoryType.dart';
 import 'package:quan_ly_nha_thuoc/utils/icon_generator.dart';
 import '../medicines/medicines_by_type_screen.dart';
@@ -106,10 +103,11 @@ class _CategoryScreenState extends State<CategoryScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Row(
                 children: [
-                  IconButton(
-                    onPressed: () => Navigator.of(context).maybePop(),
-                    icon: const Icon(Icons.arrow_back_ios, size: 20),
-                  ),
+                  // Back button removed as this is a main tab
+                  // IconButton(
+                  //   onPressed: () => Navigator.of(context).maybePop(),
+                  //   icon: const Icon(Icons.arrow_back_ios, size: 20),
+                  // ),
                   Expanded(
                     child: Container(
                       height: 44,
@@ -251,20 +249,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: AppBottomNavBar(
-        activeIndex: 1,
-        onItemSelected: (index) {
-          // If user taps home, navigate back to home
-          if (index == 0) {
-            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => HomePageScreen()));
-          }
-        },
-      ),
-      floatingActionButton: Container(
-        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 4)),
-        child: FloatingActionButton(onPressed: () {}, backgroundColor: const Color(0xFF03A297), child: const Icon(Icons.local_pharmacy)),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 

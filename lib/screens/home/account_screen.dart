@@ -5,11 +5,8 @@ import 'package:quan_ly_nha_thuoc/models/customer_model.dart';
 import 'package:quan_ly_nha_thuoc/models/user_model.dart';
 import 'package:quan_ly_nha_thuoc/providers/auth_provider.dart';
 import 'package:quan_ly_nha_thuoc/providers/customer_provider.dart';
-import 'package:quan_ly_nha_thuoc/screens/home/home_page_screen.dart';
-import 'package:quan_ly_nha_thuoc/screens/home/category_screen.dart';
 import 'package:quan_ly_nha_thuoc/theme/app_theme.dart';
 import 'package:quan_ly_nha_thuoc/utils/constants.dart';
-import 'package:quan_ly_nha_thuoc/widgets/app_bottom_nav.dart';
 import 'package:quan_ly_nha_thuoc/widgets/custom_button.dart';
 
 /// Account Screen
@@ -98,27 +95,7 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  void _onBottomNavTap(int index) {
-    if (index == 3) return;
 
-    switch (index) {
-      case 0:
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const HomePageScreen()),
-        );
-        break;
-      case 1:
-        Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (_) => const CategoryScreen()));
-        break;
-      case 2:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Chức năng đang phát triển.')),
-        );
-        break;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -169,12 +146,6 @@ class _AccountScreenState extends State<AccountScreen> {
           );
         },
       ),
-      bottomNavigationBar: AppBottomNavBar(
-        activeIndex: 3,
-        onItemSelected: _onBottomNavTap,
-      ),
-      floatingActionButton: _buildCenterButton(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 
@@ -531,43 +502,7 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  Widget _buildCenterButton() {
-    return Container(
-      width: 64,
-      height: 64,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF03A297), Color(0xFF028A7F)],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF03A297).withOpacity(0.5),
-            spreadRadius: 2,
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: Colors.white, width: 4),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Chat sẽ được cập nhật sớm.')),
-            );
-          },
-          customBorder: const CircleBorder(),
-          child: const Center(
-            child: Icon(Icons.chat_bubble, color: Colors.white, size: 28),
-          ),
-        ),
-      ),
-    );
-  }
+
 }
 
 class _InfoRow extends StatelessWidget {

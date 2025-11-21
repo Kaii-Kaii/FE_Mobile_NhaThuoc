@@ -18,7 +18,7 @@ class AppBottomNavBar extends StatelessWidget implements PreferredSizeWidget {
     final items = [
       {'icon': Icons.home, 'label': 'Trang chủ'},
       {'icon': Icons.menu_book, 'label': 'Danh mục'},
-      {'icon': Icons.notifications, 'label': 'Thông báo'},
+      {'icon': Icons.history, 'label': 'Lịch sử đơn hàng'},
       {'icon': Icons.person, 'label': 'Tài khoản'},
     ];
 

@@ -6,6 +6,8 @@ import '../medicines/trusted_brand_screen.dart';
 import '../medicines/medicine_list_screen.dart';
 import 'account_screen.dart';
 import 'category_screen.dart';
+import '../order_history/order_history_screen.dart';
+import '../main_screen.dart';
 
 class HomePageScreen extends StatefulWidget {
   const HomePageScreen({Key? key}) : super(key: key);
@@ -78,34 +80,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: AppBottomNavBar(
-        activeIndex: 0,
-        onItemSelected: (index) {
-          if (index == 1) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const CategoryScreen()),
-            );
-            return;
-          }
-          if (index == 3) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const AccountScreen()),
-            );
-            return;
-          }
-          if (index == 2) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Chức năng đang phát triển.')),
-            );
-            return;
-          }
-          // other indices can be handled later
-        },
-      ),
-      floatingActionButton: _buildCenterButton(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 
@@ -784,14 +758,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
               TextButton(
                 onPressed: () {
                   // Navigate to all categories
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) =>
-                              const MedicineListScreen(maLoaiThuoc: "LT021"),
-                    ),
-                  );
+                  MainScreen.of(context)?.setIndex(1);
                 },
                 child: const Text(
                   'Xem tất cả',
@@ -1193,40 +1160,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildCenterButton() {
-    return Container(
-      width: 64,
-      height: 64,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [const Color(0xFF03A297), const Color(0xFF028A7F)],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF03A297).withOpacity(0.5),
-            spreadRadius: 2,
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: Colors.white, width: 4),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {},
-          customBorder: const CircleBorder(),
-          child: const Center(
-            child: Icon(Icons.chat_bubble, color: Colors.white, size: 28),
-          ),
-        ),
       ),
     );
   }
