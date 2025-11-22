@@ -8,9 +8,34 @@ class OrderService {
 
   final ApiService _apiService = ApiService();
 
-  Future<void> createOnlineOrder(OnlineOrderRequest request) async {
+  Future<String> createOnlineOrder(OnlineOrderRequest request) async {
     try {
-      await _apiService.post('/HoaDon/CreateOnline', data: request.toJson());
+      final response = await _apiService.post(
+        '/HoaDon/CreateOnline',
+        data: request.toJson(),
+      );
+
+      final maHd = _extractMaHd(response.data);
+      if (maHd != null && maHd.isNotEmpty) {
+        return maHd;
+      }
+
+      return response.data.toString();
+    } catch (e) {
+      throw Exception(ApiService.handleError(e));
+    }
+  }
+
+  Future<void> sendInvoiceEmail(String maHd) async {
+    try {
+      final sanitizedMaHd = maHd.trim();
+      if (sanitizedMaHd.isEmpty) {
+        throw Exception('Mã hóa đơn không hợp lệ để gửi email.');
+      }
+
+      await _apiService.post(
+        '/HoaDon/SendToCustomer/${Uri.encodeComponent(sanitizedMaHd)}',
+      );
     } catch (e) {
       throw Exception(ApiService.handleError(e));
     }
@@ -64,4 +89,62 @@ class OrderService {
       throw Exception(ApiService.handleError(e));
     }
   }
+}
+
+String? _extractMaHd(dynamic payload) {
+  if (payload == null) {
+    return null;
+  }
+
+  if (payload is String) {
+    final trimmed = payload.trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
+  if (payload is num) {
+    return payload.toString();
+  }
+
+  if (payload is Map) {
+    final map = Map<String, dynamic>.from(payload);
+
+    const possibleKeys = ['maHD', 'maHd', 'MaHD', 'MaHd', 'mahd', 'MAHD'];
+
+    for (final key in possibleKeys) {
+      if (map.containsKey(key)) {
+        final result = _extractMaHd(map[key]);
+        if (result != null) {
+          return result;
+        }
+      }
+    }
+
+    const nestedKeys = ['data', 'invoice', 'hoaDon'];
+    for (final key in nestedKeys) {
+      if (map.containsKey(key)) {
+        final result = _extractMaHd(map[key]);
+        if (result != null) {
+          return result;
+        }
+      }
+    }
+
+    for (final value in map.values) {
+      final result = _extractMaHd(value);
+      if (result != null) {
+        return result;
+      }
+    }
+  }
+
+  if (payload is Iterable) {
+    for (final element in payload) {
+      final result = _extractMaHd(element);
+      if (result != null) {
+        return result;
+      }
+    }
+  }
+
+  return null;
 }

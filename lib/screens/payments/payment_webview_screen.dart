@@ -83,7 +83,16 @@ class _PaymentWebViewScreenState extends State<PaymentWebViewScreen> {
         throw Exception(status.message ?? 'Thanh toán chưa được xác nhận.');
       }
 
-      await _orderService.createOnlineOrder(widget.orderRequest);
+      final maHd = await _orderService.createOnlineOrder(widget.orderRequest);
+
+      print('Created Order ID: $maHd');
+
+      try {
+        await _orderService.sendInvoiceEmail(maHd);
+      } catch (e) {
+        print('Error sending email: $e');
+        // Continue even if email sending fails
+      }
 
       if (!mounted) return;
       context.read<CartProvider>().clear();

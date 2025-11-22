@@ -11,10 +11,10 @@ class OrderHistoryScreen extends StatefulWidget {
   const OrderHistoryScreen({Key? key}) : super(key: key);
 
   @override
-  State<OrderHistoryScreen> createState() => _OrderHistoryScreenState();
+  State<OrderHistoryScreen> createState() => OrderHistoryScreenState();
 }
 
-class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
+class OrderHistoryScreenState extends State<OrderHistoryScreen> {
   final OrderService _orderService = OrderService();
   late Future<List<OrderHistoryModel>> _historyFuture;
 
@@ -22,6 +22,12 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   void initState() {
     super.initState();
     _loadHistory();
+  }
+
+  void refresh() {
+    setState(() {
+      _loadHistory();
+    });
   }
 
   void _loadHistory() {

@@ -20,24 +20,28 @@ class MainScreen extends StatefulWidget {
 
 class MainScreenState extends State<MainScreen> {
   late int _selectedIndex;
+  final GlobalKey<OrderHistoryScreenState> _orderHistoryKey = GlobalKey();
+  late final List<Widget> _screens;
 
   @override
   void initState() {
     super.initState();
     _selectedIndex = widget.initialIndex;
+    _screens = [
+      const HomePageScreen(),
+      const CategoryScreen(),
+      OrderHistoryScreen(key: _orderHistoryKey),
+      const AccountScreen(),
+    ];
   }
-
-  final List<Widget> _screens = [
-    const HomePageScreen(),
-    const CategoryScreen(),
-    const OrderHistoryScreen(),
-    const AccountScreen(),
-  ];
 
   void setIndex(int index) {
     setState(() {
       _selectedIndex = index;
     });
+    if (index == 2) {
+      _orderHistoryKey.currentState?.refresh();
+    }
   }
 
   @override
@@ -46,11 +50,7 @@ class MainScreenState extends State<MainScreen> {
       body: IndexedStack(index: _selectedIndex, children: _screens),
       bottomNavigationBar: AppBottomNavBar(
         activeIndex: _selectedIndex,
-        onItemSelected: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
+        onItemSelected: setIndex,
       ),
       floatingActionButton: const CenterFloatingButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
