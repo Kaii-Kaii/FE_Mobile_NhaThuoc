@@ -30,14 +30,17 @@ class InvoiceDetailModel {
   factory InvoiceDetailModel.fromJson(Map<String, dynamic> json) {
     return InvoiceDetailModel(
       maHD: json['maHD'] ?? '',
-      ngayLap: DateTime.parse(json['ngayLap']),
+      ngayLap:
+          json['ngayLap'] != null
+              ? DateTime.parse(json['ngayLap'])
+              : DateTime.now(),
       maKH: json['maKH'] ?? '',
       tenKH: json['tenKH'] ?? '',
       diaChiKH: json['diaChiKH'] ?? '',
       dienThoaiKH: json['dienThoaiKH'] ?? '',
       maNV: json['maNV'] ?? '',
       tenNV: json['tenNV'] ?? '',
-      tongTien: (json['tongTien'] as num).toDouble(),
+      tongTien: (json['tongTien'] as num?)?.toDouble() ?? 0.0,
       ghiChu: json['ghiChu'],
       trangThaiGiaoHang: json['trangThaiGiaoHang'] ?? 0,
       trangThaiGiaoHangName: json['trangThaiGiaoHangName'] ?? '',
@@ -53,7 +56,7 @@ class InvoiceSummaryItemModel {
   final String maLoaiDonVi;
   final String tenLoaiDonVi;
   final int tongSoLuong;
-  final DateTime hanSuDungGanNhat;
+  final DateTime? hanSuDungGanNhat;
   final double donGiaTrungBinh;
   final double tongThanhTien;
 
@@ -65,7 +68,7 @@ class InvoiceSummaryItemModel {
     required this.maLoaiDonVi,
     required this.tenLoaiDonVi,
     required this.tongSoLuong,
-    required this.hanSuDungGanNhat,
+    this.hanSuDungGanNhat,
     required this.donGiaTrungBinh,
     required this.tongThanhTien,
   });
@@ -79,9 +82,12 @@ class InvoiceSummaryItemModel {
       maLoaiDonVi: json['maLoaiDonVi'] ?? '',
       tenLoaiDonVi: json['tenLoaiDonVi'] ?? '',
       tongSoLuong: json['tongSoLuong'] ?? 0,
-      hanSuDungGanNhat: DateTime.parse(json['hanSuDungGanNhat']),
-      donGiaTrungBinh: (json['donGiaTrungBinh'] as num).toDouble(),
-      tongThanhTien: (json['tongThanhTien'] as num).toDouble(),
+      hanSuDungGanNhat:
+          json['hanSuDungGanNhat'] != null
+              ? DateTime.parse(json['hanSuDungGanNhat'])
+              : null,
+      donGiaTrungBinh: (json['donGiaTrungBinh'] as num?)?.toDouble() ?? 0.0,
+      tongThanhTien: (json['tongThanhTien'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }

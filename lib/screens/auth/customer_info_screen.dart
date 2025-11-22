@@ -27,6 +27,7 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
   DateTime? _selectedDate;
   String _selectedGender = 'Nam';
   String? _redirectRoute;
+  bool _popOnSuccess = false;
   bool _didLoadArgs = false;
 
   @override
@@ -42,6 +43,10 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
       }
     } else if (args is String && args.isNotEmpty) {
       _redirectRoute = args;
+    }
+
+    if (args is Map<String, dynamic>) {
+      _popOnSuccess = args['popOnSuccess'] ?? false;
     }
 
     _didLoadArgs = true;
@@ -191,6 +196,10 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
                   text: 'Tiếp tục',
                   onPressed: () {
                     Navigator.of(context).pop();
+                    if (_popOnSuccess) {
+                      Navigator.of(context).pop();
+                      return;
+                    }
                     final targetRoute =
                         (_redirectRoute == null ||
                                 _redirectRoute ==

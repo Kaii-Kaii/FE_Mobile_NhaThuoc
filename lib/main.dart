@@ -8,7 +8,7 @@ import 'package:quan_ly_nha_thuoc/providers/medicine_provider.dart';
 import 'package:quan_ly_nha_thuoc/screens/auth/customer_info_screen.dart';
 import 'package:quan_ly_nha_thuoc/screens/auth/login_screen.dart';
 import 'package:quan_ly_nha_thuoc/screens/auth/register_screen.dart';
-import 'package:quan_ly_nha_thuoc/screens/home/account_screen.dart';
+
 import 'package:quan_ly_nha_thuoc/screens/home/home_page_screen.dart';
 import 'package:quan_ly_nha_thuoc/screens/main_screen.dart';
 import 'package:quan_ly_nha_thuoc/theme/app_theme.dart';
@@ -63,7 +63,8 @@ class MyApp extends StatelessWidget {
           AppConstants.customerInfoRoute:
               (context) => const CustomerInfoScreen(),
           AppConstants.homeRoute: (context) => const MainScreen(),
-          AppConstants.accountRoute: (context) => const AccountScreen(),
+          AppConstants.accountRoute:
+              (context) => const MainScreen(initialIndex: 3),
         },
       ),
     );

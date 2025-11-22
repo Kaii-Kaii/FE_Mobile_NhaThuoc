@@ -95,8 +95,6 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -486,7 +484,7 @@ class _AccountScreenState extends State<AccountScreen> {
           onPressed: () {
             Navigator.of(context).pushNamed(
               AppConstants.loginRoute,
-              arguments: {"redirectRoute": AppConstants.accountRoute},
+              arguments: {"popOnSuccess": true},
             );
           },
         ),
@@ -501,8 +499,6 @@ class _AccountScreenState extends State<AccountScreen> {
       ],
     );
   }
-
-
 }
 
 class _InfoRow extends StatelessWidget {

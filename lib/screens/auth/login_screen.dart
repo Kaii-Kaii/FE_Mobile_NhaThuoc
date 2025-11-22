@@ -24,6 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _rememberMe = false;
   String? _redirectRoute;
+  bool _popOnSuccess = false;
   bool _didLoadRouteArgs = false;
 
   @override
@@ -51,6 +52,10 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } else if (args is String && args.isNotEmpty) {
       _redirectRoute = args;
+    }
+
+    if (args is Map<String, dynamic>) {
+      _popOnSuccess = args['popOnSuccess'] ?? false;
     }
 
     _didLoadRouteArgs = true;
@@ -122,11 +127,18 @@ class _LoginScreenState extends State<LoginScreen> {
               : _redirectRoute!;
 
       if (hasCustomerInfo) {
-        Navigator.of(context).pushReplacementNamed(redirectRoute);
+        if (_popOnSuccess) {
+          Navigator.of(context).pop();
+        } else {
+          Navigator.of(context).pushReplacementNamed(redirectRoute);
+        }
       } else {
         Navigator.of(context).pushReplacementNamed(
           AppConstants.customerInfoRoute,
-          arguments: {"redirectRoute": redirectRoute},
+          arguments: {
+            "redirectRoute": redirectRoute,
+            "popOnSuccess": _popOnSuccess,
+          },
         );
       }
     } else {

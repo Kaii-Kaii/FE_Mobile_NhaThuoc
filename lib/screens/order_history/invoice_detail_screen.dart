@@ -429,7 +429,8 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
 
   Widget _buildProductItem(InvoiceSummaryItemModel item) {
     final now = DateTime.now();
-    final daysUntilExpiry = item.hanSuDungGanNhat.difference(now).inDays;
+    final daysUntilExpiry =
+        item.hanSuDungGanNhat?.difference(now).inDays ?? 999;
     final isExpiringSoon = daysUntilExpiry <= 90 && daysUntilExpiry > 0;
     final isExpired = daysUntilExpiry <= 0;
 
@@ -539,86 +540,88 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
                     ),
                   ],
                 ),
-                const Divider(height: 20),
-                Row(
-                  children: [
-                    Icon(
-                      isExpired
-                          ? Icons.warning
-                          : isExpiringSoon
-                          ? Icons.access_time
-                          : Icons.calendar_today,
-                      size: 16,
-                      color:
-                          isExpired
-                              ? Colors.red
-                              : isExpiringSoon
-                              ? Colors.orange
-                              : Colors.grey[600],
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'HSD: ${DateFormat('dd/MM/yyyy').format(item.hanSuDungGanNhat)}',
-                      style: TextStyle(
-                        fontSize: 12,
+                if (item.hanSuDungGanNhat != null) ...[
+                  const Divider(height: 20),
+                  Row(
+                    children: [
+                      Icon(
+                        isExpired
+                            ? Icons.warning
+                            : isExpiringSoon
+                            ? Icons.access_time
+                            : Icons.calendar_today,
+                        size: 16,
                         color:
                             isExpired
                                 ? Colors.red
                                 : isExpiringSoon
                                 ? Colors.orange
                                 : Colors.grey[600],
-                        fontWeight:
-                            isExpired || isExpiringSoon
-                                ? FontWeight.bold
-                                : FontWeight.normal,
                       ),
-                    ),
-                    if (isExpiringSoon && !isExpired) ...[
                       const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
+                      Text(
+                        'HSD: ${DateFormat('dd/MM/yyyy').format(item.hanSuDungGanNhat!)}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color:
+                              isExpired
+                                  ? Colors.red
+                                  : isExpiringSoon
+                                  ? Colors.orange
+                                  : Colors.grey[600],
+                          fontWeight:
+                              isExpired || isExpiringSoon
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
                         ),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: Colors.orange),
-                        ),
-                        child: Text(
-                          'Sắp hết hạn',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.orange[800],
-                            fontWeight: FontWeight.bold,
+                      ),
+                      if (isExpiringSoon && !isExpired) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: Colors.orange),
+                          ),
+                          child: Text(
+                            'Sắp hết hạn',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.orange[800],
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                    if (isExpired) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: Colors.red),
-                        ),
-                        child: const Text(
-                          'Hết hạn',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.red,
-                            fontWeight: FontWeight.bold,
+                      ],
+                      if (isExpired) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: Colors.red),
+                          ),
+                          child: const Text(
+                            'Hết hạn',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ],
-                  ],
-                ),
+                  ),
+                ],
               ],
             ),
           ),

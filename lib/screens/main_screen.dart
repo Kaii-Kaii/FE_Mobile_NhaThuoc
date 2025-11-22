@@ -7,7 +7,8 @@ import 'package:quan_ly_nha_thuoc/widgets/app_bottom_nav.dart';
 import 'package:quan_ly_nha_thuoc/widgets/center_floating_button.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final int initialIndex;
+  const MainScreen({super.key, this.initialIndex = 0});
 
   static MainScreenState? of(BuildContext context) {
     return context.findAncestorStateOfType<MainScreenState>();
@@ -18,7 +19,13 @@ class MainScreen extends StatefulWidget {
 }
 
 class MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
 
   final List<Widget> _screens = [
     const HomePageScreen(),
@@ -36,10 +43,7 @@ class MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _screens,
-      ),
+      body: IndexedStack(index: _selectedIndex, children: _screens),
       bottomNavigationBar: AppBottomNavBar(
         activeIndex: _selectedIndex,
         onItemSelected: (index) {
