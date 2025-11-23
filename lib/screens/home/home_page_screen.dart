@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../../providers/cart_provider.dart';
 import '../medicines/cart_screen.dart';
 import '../../utils/medicine_navigation.dart';
@@ -7,6 +8,12 @@ import '../medicines/trusted_brand_screen.dart';
 import '../medicines/medicine_list_screen.dart';
 import 'category_screen.dart';
 import '../main_screen.dart';
+import 'package:quan_ly_nha_thuoc/models/categoryGroup/CategoryGroup.dart';
+import 'package:quan_ly_nha_thuoc/models/categoryGroup/CategoryGroup_service.dart';
+import 'package:quan_ly_nha_thuoc/services/thuoc_service.dart';
+import 'package:quan_ly_nha_thuoc/models/medicine_by_type.dart';
+import 'package:quan_ly_nha_thuoc/utils/icon_generator.dart';
+import '../medicines/medicine_detail_screen.dart';
 
 class HomePageScreen extends StatefulWidget {
   const HomePageScreen({Key? key}) : super(key: key);
@@ -16,36 +23,13 @@ class HomePageScreen extends StatefulWidget {
 }
 
 class _HomePageScreenState extends State<HomePageScreen> {
-  final TextEditingController _searchController = TextEditingController();
+  final CategoryGroupService _categoryService = CategoryGroupService();
+  final ThuocService _medicineService = ThuocService();
+  List<CategoryGroup> _categories = [];
+  List<MedicineByType> _featuredMedicines = [];
+  bool _loading = true;
+  String? _error;
   int _currentBannerIndex = 0;
-
-  final List<Map<String, dynamic>> _quickActionItems = [
-    {
-      'icon': Icons.inventory_2,
-      'label': 'Toàn bộ thuốc',
-      'color': const Color(0xFF03A297),
-    },
-    {
-      'icon': Icons.medication,
-      'label': 'Thuốc',
-      'color': const Color(0xFF023350),
-    },
-    {
-      'icon': Icons.healing,
-      'label': 'Tủ thuốc',
-      'color': const Color(0xFF03A297),
-    },
-    {
-      'icon': Icons.shopping_basket,
-      'label': 'Mua hàng',
-      'color': const Color(0xFF023350),
-    },
-    {
-      'icon': Icons.verified,
-      'label': 'Thương hiệu',
-      'color': const Color(0xFF03A297),
-    },
-  ];
 
   final List<Map<String, dynamic>> _promotionBanners = [
     {
@@ -63,21 +47,52 @@ class _HomePageScreenState extends State<HomePageScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _fetchData();
+  }
+
+  Future<void> _fetchData() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final groups = await _categoryService.getAllCategoryGroups();
+      final medicines = await _medicineService.getAll();
+      setState(() {
+        _categories = groups;
+        _featuredMedicines = medicines.take(10).toList();
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _loading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       body: SafeArea(
-        child: ListView(
-          children: [
-            _buildHeader(),
-            // SearchBar đã được tích hợp vào header
-            _buildWelcomeCard(),
-            _buildQuickActions(),
-            _buildPromotionBanner(),
-            _buildFeaturedCategories(),
-            _buildFeaturedProducts(),
-          ],
-        ),
+        child:
+            _loading
+                ? const Center(child: CircularProgressIndicator())
+                : RefreshIndicator(
+                  onRefresh: _fetchData,
+                  child: ListView(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    children: [
+                      _buildHeader(),
+                      _buildPromotionBanner(),
+                      _buildDynamicCategories(),
+                      _buildDynamicProducts(),
+                    ],
+                  ),
+                ),
       ),
     );
   }
@@ -362,251 +377,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
     );
   }
 
-  // Ẩn phương thức SearchBar cũ vì đã tích hợp vào header
-  Widget _buildOldSearchBar() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      color: const Color(0xFF03A297),
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              height: 46,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.search, color: Colors.grey[400]),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: const InputDecoration(
-                        hintText: 'Tìm kiếm',
-                        border: InputBorder.none,
-                        hintStyle: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(23),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.camera_alt_outlined),
-              color: Colors.grey[400],
-              onPressed: () {},
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWelcomeCard() {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [const Color(0xFF03A297), const Color(0xFF028A7F)],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF03A297).withOpacity(0.3),
-            spreadRadius: 2,
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.favorite,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Text(
-                  'Chào mừng bạn đến với Nhà Thuốc!',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          const Text(
-            'Bảo vệ sức khỏe của bạn và gia đình với dịch vụ chuyên nghiệp từ các dược sĩ của chúng tôi',
-            style: TextStyle(color: Colors.white, fontSize: 14, height: 1.4),
-          ),
-          const SizedBox(height: 18),
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: const Color(0xFF03A297),
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(Icons.phone_in_talk, size: 18),
-                SizedBox(width: 8),
-                Text(
-                  'Tư vấn ngay',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuickActions() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                Container(
-                  width: 4,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        const Color(0xFF023350),
-                        const Color(0xFF02294A),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                const Text(
-                  'Truy cập nhanh',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF333333),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            height: 100,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              itemCount: _quickActionItems.length,
-              itemBuilder: (context, index) {
-                final item = _quickActionItems[index];
-                return GestureDetector(
-                  onTap: () => _handleQuickActionTap(index),
-                  child: Container(
-                    width: 84,
-                    margin: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 64,
-                          height: 64,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors:
-                                  index % 2 == 0
-                                      ? [
-                                        const Color(0xFF023350),
-                                        const Color(0xFF02294A),
-                                      ]
-                                      : [
-                                        const Color(0xFF03A297),
-                                        const Color(0xFF028A7F),
-                                      ],
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: item['color'].withOpacity(0.4),
-                                spreadRadius: 2,
-                                blurRadius: 8,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            item['icon'],
-                            color: Colors.white,
-                            size: 30,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          item['label'],
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF333333),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildPromotionBanner() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -731,13 +501,14 @@ class _HomePageScreenState extends State<HomePageScreen> {
     );
   }
 
-  Widget _buildFeaturedCategories() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+  Widget _buildDynamicCategories() {
+    if (_categories.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
@@ -746,18 +517,11 @@ class _HomePageScreenState extends State<HomePageScreen> {
                     width: 4,
                     height: 20,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          const Color(0xFF03A297),
-                          const Color(0xFF028A7F),
-                        ],
-                      ),
+                      color: const Color(0xFF03A297),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 8),
                   const Text(
                     'Danh mục nổi bật',
                     style: TextStyle(
@@ -770,241 +534,157 @@ class _HomePageScreenState extends State<HomePageScreen> {
               ),
               TextButton(
                 onPressed: () {
-                  // Navigate to all categories
                   MainScreen.of(context)?.setIndex(1);
                 },
                 child: const Text(
                   'Xem tất cả',
-                  style: TextStyle(
-                    color: Color(0xFF03A297),
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(color: Color(0xFF03A297)),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildCategoryItem(
-                'Tủ thuốc\ngia đình',
-                'https://i.ibb.co/bRs7k4q/family-medicine.png',
-                () {
+        ),
+        SizedBox(
+          height: 110,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            itemCount: _categories.length,
+            itemBuilder: (context, index) {
+              final cat = _categories[index];
+              return GestureDetector(
+                onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder:
-                          (context) =>
-                              const MedicineListScreen(maLoaiThuoc: "LT010"),
+                          (_) => CategoryScreen(initialGroupId: cat.maNhomLoai),
                     ),
                   );
                 },
-              ),
-              _buildCategoryItem(
-                'Thương hiệu\ntin dùng',
-                'https://i.ibb.co/kG9p1WB/trusted-brands.png',
-                () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TrustedBrandScreen(),
-                    ),
-                  );
-                },
-              ),
-              _buildCategoryItem(
-                'Thực phẩm\nchức năng',
-                'https://i.ibb.co/HYLCZ0C/supplements.png',
-                () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MedicineListScreen(),
-                    ),
-                  );
-                },
-              ),
-              _buildCategoryItem(
-                'Chăm sóc\nda mặt',
-                'https://i.ibb.co/HxYRx3h/skincare.png',
-                () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MedicineListScreen(),
-                    ),
-                  );
-                },
-              ),
-            ],
+                child: Container(
+                  width: 80,
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          IconGenerator.getIconForMedicineType(cat.tenNhomLoai),
+                          color: const Color(0xFF03A297),
+                          size: 28,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        cat.tenNhomLoai,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF333333),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  Widget _buildCategoryItem(String title, String imageUrl, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 80,
-        child: Column(
-          children: [
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
-                    spreadRadius: 1,
-                    blurRadius: 5,
-                    offset: const Offset(0, 1),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(30),
-                child: Image.network(
-                  imageUrl,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey[100],
-                      child: const Icon(
-                        Icons.image_not_supported,
-                        color: Colors.grey,
-                      ),
-                    );
-                  },
+  Widget _buildDynamicProducts() {
+    if (_featuredMedicines.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+          child: Row(
+            children: [
+              Container(
+                width: 4,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF023350),
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFeaturedProducts() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 4,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          const Color(0xFF023350),
-                          const Color(0xFF02294A),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  const Text(
-                    'Sản phẩm nổi bật',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF333333),
-                    ),
-                  ),
-                ],
+              const SizedBox(width: 8),
+              const Text(
+                'Sản phẩm nổi bật',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF333333),
+                ),
               ),
+              const Spacer(),
               TextButton(
                 onPressed: () {
-                  // Navigate to all products
-                  MedicineNavigation.navigateToMedicineList(context, "LT001");
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (_) => const MedicineListScreen(
+                            title: "Tất cả sản phẩm",
+                          ),
+                    ),
+                  );
                 },
                 child: const Text(
                   'Xem tất cả',
-                  style: TextStyle(
-                    color: Color(0xFF023350),
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(color: Color(0xFF03A297)),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          GridView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.75,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-            ),
-            itemCount: 4, // Display only 4 featured products
-            itemBuilder: (context, index) {
-              return _buildProductItem(index);
-            },
+        ),
+        GridView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 0.7,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
           ),
-        ],
-      ),
+          itemCount: _featuredMedicines.length,
+          itemBuilder: (context, index) {
+            final medicine = _featuredMedicines[index];
+            return _buildProductCard(medicine);
+          },
+        ),
+      ],
     );
   }
 
-  Widget _buildProductItem(int index) {
-    // Sample product data
-    final List<Map<String, dynamic>> products = [
-      {
-        'name': 'Viên uống Vitamin C DHC',
-        'price': 120000,
-        'originalPrice': 150000,
-        'image': 'https://i.ibb.co/HxYRx3h/skincare.png',
-        'discount': 20,
-      },
-      {
-        'name': 'Sữa rửa mặt Cetaphil Gentle Skin',
-        'price': 195000,
-        'originalPrice': 230000,
-        'image': 'https://i.ibb.co/kG9p1WB/trusted-brands.png',
-        'discount': 15,
-      },
-      {
-        'name': 'Kem chống nắng La Roche-Posay',
-        'price': 375000,
-        'originalPrice': 450000,
-        'image': 'https://i.ibb.co/HYLCZ0C/supplements.png',
-        'discount': 17,
-      },
-      {
-        'name': 'Viên uống bổ sung Omega 3',
-        'price': 280000,
-        'originalPrice': 320000,
-        'image': 'https://i.ibb.co/bRs7k4q/family-medicine.png',
-        'discount': 12,
-      },
-    ];
-
-    final product = products[index];
-
+  Widget _buildProductCard(MedicineByType medicine) {
     return GestureDetector(
       onTap: () {
-        // Navigate to product detail
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => MedicineDetailScreen(maThuoc: medicine.maThuoc),
+          ),
+        );
       },
       child: Container(
         decoration: BoxDecoration(
@@ -1012,9 +692,8 @@ class _HomePageScreenState extends State<HomePageScreen> {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 5,
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
               offset: const Offset(0, 2),
             ),
           ],
@@ -1022,100 +701,92 @@ class _HomePageScreenState extends State<HomePageScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
-                  ),
-                  child: Image.network(
-                    product['image'],
-                    height: 120,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        height: 120,
-                        width: double.infinity,
-                        color: Colors.grey[200],
-                        child: const Center(
-                          child: Icon(Icons.image_not_supported),
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12),
+                ),
+                child:
+                    medicine.urlAnh != null && medicine.urlAnh!.isNotEmpty
+                        ? Image.network(
+                          medicine.urlAnh!,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder:
+                              (_, __, ___) => Container(
+                                color: Colors.grey[100],
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.image_not_supported,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+                        )
+                        : Container(
+                          color: Colors.grey[100],
+                          child: const Center(
+                            child: Icon(
+                              Icons.medication,
+                              color: Color(0xFF03A297),
+                              size: 40,
+                            ),
+                          ),
                         ),
-                      );
-                    },
-                  ),
-                ),
-                Positioned(
-                  top: 8,
-                  left: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      '-${product['discount']}%',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
             Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    product['name'],
+                    medicine.tenThuoc,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${product['price']} đ',
-                    style: const TextStyle(
-                      fontSize: 15,
                       fontWeight: FontWeight.bold,
-                      color: Colors.red,
+                      fontSize: 13,
+                      color: Color(0xFF333333),
                     ),
                   ),
+                  const SizedBox(height: 4),
                   Text(
-                    '${product['originalPrice']} đ',
+                    medicine.giaThuocs.isNotEmpty
+                        ? '${NumberFormat("#,###", "vi_VN").format(medicine.giaThuocs.first.donGia)} đ'
+                        : 'Liên hệ',
                     style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                      decoration: TextDecoration.lineThrough,
+                      color: Color(0xFFD32F2F),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Container(
+                  SizedBox(
                     width: double.infinity,
+                    height: 32,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (_) => MedicineDetailScreen(
+                                  maThuoc: medicine.maThuoc,
+                                ),
+                          ),
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF03A297),
-                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        padding: EdgeInsets.zero,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
                       child: const Text(
                         'Thêm vào giỏ',
-                        style: TextStyle(fontSize: 12),
+                        style: TextStyle(fontSize: 12, color: Colors.white),
                       ),
                     ),
                   ),
@@ -1126,89 +797,5 @@ class _HomePageScreenState extends State<HomePageScreen> {
         ),
       ),
     );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return BottomAppBar(
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 8,
-      child: Container(
-        height: 60,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildNavItem(Icons.home, 'Trang chủ', true),
-            _buildNavItem(Icons.menu, 'Danh mục', false),
-            const SizedBox(width: 60), // Space for FAB
-            _buildNavItem(Icons.notifications, 'Thông báo', false),
-            _buildNavItem(Icons.person, 'Tài khoản', false),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, String label, bool isActive) {
-    return InkWell(
-      onTap: () {
-        if (label == 'Danh mục') {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CategoryScreen()),
-          );
-          return;
-        }
-        // other taps can be implemented later
-      },
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: isActive ? const Color(0xFF03A297) : Colors.grey),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: isActive ? const Color(0xFF03A297) : Colors.grey,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Handle tap on quick action buttons
-  void _handleQuickActionTap(int index) {
-    switch (index) {
-      case 0: // Toàn bộ thuốc
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const MedicineListScreen(title: 'Toàn bộ thuốc'),
-          ),
-        );
-        break;
-      case 1: // Thuốc
-        MedicineNavigation.navigateToMedicineList(context, "LT001");
-        break;
-      case 2: // Tủ thuốc
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder:
-                (context) => const MedicineListScreen(maLoaiThuoc: "LT010"),
-          ),
-        );
-        break;
-      case 3: // Mua hàng
-        MedicineNavigation.navigateToMedicineList(context, "LT001");
-        break;
-      case 4: // Thương hiệu
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const TrustedBrandScreen()),
-        );
-        break;
-    }
   }
 }

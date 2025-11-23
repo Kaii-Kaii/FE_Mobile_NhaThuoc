@@ -8,13 +8,19 @@ import 'package:flutter/foundation.dart';
 class NetworkImageWithCertHandling extends StatefulWidget {
   final String imageUrl;
   final BoxFit fit;
-  const NetworkImageWithCertHandling({Key? key, required this.imageUrl, this.fit = BoxFit.cover}) : super(key: key);
+  const NetworkImageWithCertHandling({
+    Key? key,
+    required this.imageUrl,
+    this.fit = BoxFit.cover,
+  }) : super(key: key);
 
   @override
-  State<NetworkImageWithCertHandling> createState() => _NetworkImageWithCertHandlingState();
+  State<NetworkImageWithCertHandling> createState() =>
+      _NetworkImageWithCertHandlingState();
 }
 
-class _NetworkImageWithCertHandlingState extends State<NetworkImageWithCertHandling> {
+class _NetworkImageWithCertHandlingState
+    extends State<NetworkImageWithCertHandling> {
   Uint8List? _bytes;
   bool _loading = true;
   bool _error = false;
@@ -28,32 +34,60 @@ class _NetworkImageWithCertHandlingState extends State<NetworkImageWithCertHandl
   Future<void> _fetchBytes() async {
     try {
       if (!kReleaseMode) {
-        final ioc = HttpClient()
-          ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+        final ioc =
+            HttpClient()
+              ..badCertificateCallback =
+                  (X509Certificate cert, String host, int port) => true;
         final client = IOClient(ioc);
         final resp = await client.get(Uri.parse(widget.imageUrl));
         client.close();
+        if (!mounted) return;
         if (resp.statusCode == 200) {
-          setState(() { _bytes = resp.bodyBytes; _loading = false; });
+          setState(() {
+            _bytes = resp.bodyBytes;
+            _loading = false;
+          });
           return;
         }
       } else {
         final resp = await http.get(Uri.parse(widget.imageUrl));
+        if (!mounted) return;
         if (resp.statusCode == 200) {
-          setState(() { _bytes = resp.bodyBytes; _loading = false; });
+          setState(() {
+            _bytes = resp.bodyBytes;
+            _loading = false;
+          });
           return;
         }
       }
-      setState(() { _error = true; _loading = false; });
+      if (mounted) {
+        setState(() {
+          _error = true;
+          _loading = false;
+        });
+      }
     } catch (e) {
-      setState(() { _error = true; _loading = false; });
+      if (mounted) {
+        setState(() {
+          _error = true;
+          _loading = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) return const Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator()));
-    if (_error || _bytes == null) return const Icon(Icons.broken_image, color: Color(0xFF03A297));
+    if (_loading)
+      return const Center(
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(),
+        ),
+      );
+    if (_error || _bytes == null)
+      return const Icon(Icons.broken_image, color: Color(0xFF03A297));
     return Image.memory(_bytes!, fit: widget.fit);
   }
 }

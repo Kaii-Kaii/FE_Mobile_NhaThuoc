@@ -9,7 +9,8 @@ import 'package:quan_ly_nha_thuoc/utils/icon_generator.dart';
 import '../medicines/medicines_by_type_screen.dart';
 
 class CategoryScreen extends StatefulWidget {
-  const CategoryScreen({Key? key}) : super(key: key);
+  final String? initialGroupId;
+  const CategoryScreen({Key? key, this.initialGroupId}) : super(key: key);
 
   @override
   State<CategoryScreen> createState() => _CategoryScreenState();
@@ -61,10 +62,18 @@ class _CategoryScreenState extends State<CategoryScreen> {
       // Use _groupIds[0] directly to avoid any timing/fallback issue where the map
       // entry might not yet contain 'id' when _onSelectGroup reads it.
       if (_groupIds.isNotEmpty) {
-        final firstId = _groupIds[0];
-        print('Auto-loading types for first group id=$firstId');
+        int initialIndex = 0;
+        if (widget.initialGroupId != null) {
+          final foundIndex = _groupIds.indexOf(widget.initialGroupId!);
+          if (foundIndex != -1) {
+            initialIndex = foundIndex;
+          }
+        }
+
+        final firstId = _groupIds[initialIndex];
+        print('Auto-loading types for group id=$firstId (index=$initialIndex)');
         setState(() {
-          _selectedIndex = 0;
+          _selectedIndex = initialIndex;
           _types = [];
           _typesError = null;
           _loadingTypes = true;
