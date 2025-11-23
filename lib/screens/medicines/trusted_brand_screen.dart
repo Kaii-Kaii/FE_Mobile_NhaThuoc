@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/cart_provider.dart';
+import 'cart_screen.dart';
 
 class TrustedBrandScreen extends StatefulWidget {
   const TrustedBrandScreen({Key? key}) : super(key: key);
@@ -11,58 +14,66 @@ class _TrustedBrandScreenState extends State<TrustedBrandScreen> {
   final List<Map<String, dynamic>> _trustedBrands = [
     {
       'name': 'URGO',
-      'logo': 'https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/00017075_cao_dan_giam_dau_urgo_corticosteroides_10_mieng_04_0692_61f8_large_c2cbcdf807.jpg',
+      'logo':
+          'https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/00017075_cao_dan_giam_dau_urgo_corticosteroides_10_mieng_04_0692_61f8_large_c2cbcdf807.jpg',
       'discount': 'Giảm đến 35%',
       'backgroundGradient': [const Color(0xFFE1F5FE), const Color(0xFF81D4FA)],
       'products': [
         {
           'name': 'Cao dán giảm đau URGO',
-          'image': 'https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/00017075_cao_dan_giam_dau_urgo_corticosteroides_10_mieng_04_0692_61f8_large_c2cbcdf807.jpg',
+          'image':
+              'https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/00017075_cao_dan_giam_dau_urgo_corticosteroides_10_mieng_04_0692_61f8_large_c2cbcdf807.jpg',
           'price': 75000,
           'originalPrice': 115000,
         },
         {
           'name': 'Băng dán vết thương URGO',
-          'image': 'https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/00002437_bang_dan_urgo_ma_315_hop_30_cai_3368_5f13_large_607dec14c2.jpg',
+          'image':
+              'https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/00002437_bang_dan_urgo_ma_315_hop_30_cai_3368_5f13_large_607dec14c2.jpg',
           'price': 35000,
           'originalPrice': 53000,
-        }
-      ]
+        },
+      ],
     },
     {
       'name': 'COSTAR',
-      'logo': 'https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/00028302_vien_uong_bo_sung_omega_3_6_9_costar_1000mg_1_25mg_100v_5523_61af_large_516d759dde.jpg',
+      'logo':
+          'https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/00028302_vien_uong_bo_sung_omega_3_6_9_costar_1000mg_1_25mg_100v_5523_61af_large_516d759dde.jpg',
       'discount': 'Giảm đến 25%',
       'backgroundGradient': [const Color(0xFFFFF9C4), const Color(0xFFFFE082)],
       'products': [
         {
           'name': 'Viên uống bổ sung Omega 3-6-9 Costar',
-          'image': 'https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/00028302_vien_uong_bo_sung_omega_3_6_9_costar_1000mg_1_25mg_100v_5523_61af_large_516d759dde.jpg',
+          'image':
+              'https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/00028302_vien_uong_bo_sung_omega_3_6_9_costar_1000mg_1_25mg_100v_5523_61af_large_516d759dde.jpg',
           'price': 300000,
           'originalPrice': 399000,
         },
         {
           'name': 'Costar Fish Oil 1000mg',
-          'image': 'https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/00501793_dau_ca_fish_oil_1000mg_costar_1_hop_100_vien_6925_612a_large_e1710bdebe.jpg',
+          'image':
+              'https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/00501793_dau_ca_fish_oil_1000mg_costar_1_hop_100_vien_6925_612a_large_e1710bdebe.jpg',
           'price': 240000,
           'originalPrice': 320000,
-        }
-      ]
+        },
+      ],
     },
     {
       'name': 'BLACKMORES',
-      'logo': 'https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/00028511_blackmores_bio_c_1000mg_62_vien_1054_6153_large_988b35153e.jpg',
+      'logo':
+          'https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/00028511_blackmores_bio_c_1000mg_62_vien_1054_6153_large_988b35153e.jpg',
       'discount': 'Giảm đến 30%',
       'backgroundGradient': [const Color(0xFFE8F5E9), const Color(0xFFA5D6A7)],
       'products': [
         {
           'name': 'Blackmores Bio C 1000mg',
-          'image': 'https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/00028511_blackmores_bio_c_1000mg_62_vien_1054_6153_large_988b35153e.jpg',
+          'image':
+              'https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/00028511_blackmores_bio_c_1000mg_62_vien_1054_6153_large_988b35153e.jpg',
           'price': 420000,
           'originalPrice': 600000,
-        }
-      ]
-    }
+        },
+      ],
+    },
   ];
 
   @override
@@ -82,9 +93,45 @@ class _TrustedBrandScreenState extends State<TrustedBrandScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.shopping_cart, color: Colors.white),
-            onPressed: () {},
+          Consumer<CartProvider>(
+            builder:
+                (_, cart, __) => Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.shopping_cart,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const CartScreen()),
+                        );
+                      },
+                    ),
+                    if (cart.items.isNotEmpty)
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            '${cart.items.length}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
           ),
         ],
       ),
@@ -128,18 +175,11 @@ class _TrustedBrandScreenState extends State<TrustedBrandScreen> {
               ),
               Text(
                 'Giảm giá lên đến 35%',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: Colors.white70, fontSize: 14),
               ),
             ],
           ),
-          Icon(
-            Icons.verified,
-            color: Colors.white,
-            size: 40,
-          ),
+          Icon(Icons.verified, color: Colors.white, size: 40),
         ],
       ),
     );
@@ -209,7 +249,7 @@ class _TrustedBrandScreenState extends State<TrustedBrandScreen> {
               ],
             ),
           ),
-          
+
           // Products Grid
           GridView.builder(
             shrinkWrap: true,
@@ -227,7 +267,7 @@ class _TrustedBrandScreenState extends State<TrustedBrandScreen> {
               return _buildProductCard(product);
             },
           ),
-          
+
           // View All Button
           Padding(
             padding: const EdgeInsets.only(bottom: 16),
@@ -254,8 +294,9 @@ class _TrustedBrandScreenState extends State<TrustedBrandScreen> {
   }
 
   Widget _buildProductCard(Map<String, dynamic> product) {
-    final discount = ((1 - (product['price'] / product['originalPrice'])) * 100).round();
-    
+    final discount =
+        ((1 - (product['price'] / product['originalPrice'])) * 100).round();
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -284,7 +325,10 @@ class _TrustedBrandScreenState extends State<TrustedBrandScreen> {
                 right: 0,
                 top: 0,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: const BoxDecoration(
                     color: Colors.red,
                     borderRadius: BorderRadius.only(
@@ -304,7 +348,7 @@ class _TrustedBrandScreenState extends State<TrustedBrandScreen> {
               ),
             ],
           ),
-          
+
           // Product Info
           Padding(
             padding: const EdgeInsets.all(8),
@@ -321,7 +365,7 @@ class _TrustedBrandScreenState extends State<TrustedBrandScreen> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 8),
-                
+
                 // Price
                 Text(
                   '${product['price']}đ',
@@ -339,9 +383,9 @@ class _TrustedBrandScreenState extends State<TrustedBrandScreen> {
                     decoration: TextDecoration.lineThrough,
                   ),
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 // Add to Cart Button
                 SizedBox(
                   width: double.infinity,
@@ -417,9 +461,7 @@ class _TrustedBrandScreenState extends State<TrustedBrandScreen> {
                     width: 100,
                     height: 100,
                     color: Colors.grey[200],
-                    child: const Center(
-                      child: Icon(Icons.image_not_supported),
-                    ),
+                    child: const Center(child: Icon(Icons.image_not_supported)),
                   );
                 },
               ),
@@ -429,29 +471,20 @@ class _TrustedBrandScreenState extends State<TrustedBrandScreen> {
                 children: [
                   const Text(
                     'Tiêu chuẩn GPP',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Sản phẩm chính hãng',
-                    style: TextStyle(
-                      color: Colors.grey[700],
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.grey[700], fontSize: 14),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Dược sĩ tư vấn tận tâm',
-                    style: TextStyle(
-                      color: Colors.grey[700],
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.grey[700], fontSize: 14),
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ],
@@ -490,17 +523,8 @@ class _TrustedBrandScreenState extends State<TrustedBrandScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            color: Colors.grey,
-          ),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
-            ),
-          ),
+          Icon(icon, color: Colors.grey),
+          Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
         ],
       ),
     );

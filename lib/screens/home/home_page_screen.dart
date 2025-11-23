@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/cart_provider.dart';
+import '../medicines/cart_screen.dart';
 import '../../utils/medicine_navigation.dart';
-import '../../widgets/app_bottom_nav.dart';
-import '../medicines/family_medicine_screen.dart';
 import '../medicines/trusted_brand_screen.dart';
 import '../medicines/medicine_list_screen.dart';
-import 'account_screen.dart';
 import 'category_screen.dart';
-import '../order_history/order_history_screen.dart';
 import '../main_screen.dart';
 
 class HomePageScreen extends StatefulWidget {
@@ -299,47 +298,61 @@ class _HomePageScreenState extends State<HomePageScreen> {
                   ),
                 ),
                 const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        const Color(0xFF03A297),
-                        const Color(0xFF028A7F),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF03A297).withOpacity(0.4),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.shopping_cart,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 6),
-                      const Text(
-                        '0',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                Consumer<CartProvider>(
+                  builder: (context, cart, child) {
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CartScreen(),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              const Color(0xFF03A297),
+                              const Color(0xFF028A7F),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF03A297).withOpacity(0.4),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.shopping_cart,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              '${cart.items.length}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
               ],
             ),
