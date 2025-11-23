@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
-import 'package:http/io_client.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 import '../../services/thuoc_service.dart';
 import '../../models/medicine_by_type.dart';
 import 'medicine_detail_screen.dart';
+import '../../widgets/network_image_cert.dart';
 
 class MedicinesByTypeScreen extends StatefulWidget {
   final String maLoai;
   final String tenLoai;
-  const MedicinesByTypeScreen({Key? key, required this.maLoai, required this.tenLoai}) : super(key: key);
+  const MedicinesByTypeScreen({
+    Key? key,
+    required this.maLoai,
+    required this.tenLoai,
+  }) : super(key: key);
 
   @override
   State<MedicinesByTypeScreen> createState() => _MedicinesByTypeScreenState();
@@ -29,115 +31,184 @@ class _MedicinesByTypeScreenState extends State<MedicinesByTypeScreen> {
   }
 
   Future<void> _load() async {
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
       final items = await _service.getByLoai(widget.maLoai);
-      setState(() { _items = items; _loading = false; });
+      setState(() {
+        _items = items;
+        _loading = false;
+      });
     } catch (e) {
-      setState(() { _error = e.toString(); _loading = false; });
+      setState(() {
+        _error = e.toString();
+        _loading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
         title: Text(widget.tenLoai),
         backgroundColor: const Color(0xFF023350),
+        elevation: 0,
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
+      body:
+          _loading
+              ? const Center(child: CircularProgressIndicator())
+              : _error != null
               ? Center(child: Text('Lỗi: $_error'))
               : ListView.separated(
-                  padding: const EdgeInsets.all(12),
-                  itemCount: _items.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, i) {
-                    final m = _items[i];
-                    return ListTile(
-                      leading: Container(
-                        width: 56,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6)],
-                        ),
-            child: (m.urlAnh != null && m.urlAnh!.isNotEmpty)
-              ? Builder(builder: (_) {
-                final s = m.urlAnh!.trim();
-                // If API returns a full URL, use it; otherwise build Cloudinary URL
-                final imageUrl = (s.startsWith('http://') || s.startsWith('https://'))
-                  ? s
-                  : 'https://res.cloudinary.com/dmu0nknhg/image/upload/v1761064479/thuoc_images/thuoc/$s';
-                                return NetworkImageWithCertHandling(imageUrl: imageUrl, fit: BoxFit.cover);
-                })
-              : const Icon(Icons.medication, color: Color(0xFF03A297)),
-                      ),
-                      title: Text(m.tenThuoc),
-                      subtitle: Text(m.tenNCC ?? ''),
-                      trailing: Text('${m.donGiaSi ?? 0} đ', style: const TextStyle(fontWeight: FontWeight.bold)),
-                      onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(builder: (_) => MedicineDetailScreen(maThuoc: m.maThuoc)));
-                      },
-                    );
-                  },
-                ),
+                padding: const EdgeInsets.all(12),
+                itemCount: _items.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemBuilder: (context, i) {
+                  return _buildMedicineItem(_items[i]);
+                },
+              ),
     );
   }
-}
 
-// Small helper widget to load network images but accept self-signed certs in debug/profile builds.
-class NetworkImageWithCertHandling extends StatefulWidget {
-  final String imageUrl;
-  final BoxFit fit;
-  const NetworkImageWithCertHandling({Key? key, required this.imageUrl, this.fit = BoxFit.cover}) : super(key: key);
+  Widget _buildMedicineItem(MedicineByType m) {
+    final priceFormatter = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
+    final price =
+        m.giaThuocs.isNotEmpty ? m.giaThuocs.first.donGia : (m.donGiaSi ?? 0);
 
-  @override
-  State<NetworkImageWithCertHandling> createState() => _NetworkImageWithCertHandlingState();
-}
-
-class _NetworkImageWithCertHandlingState extends State<NetworkImageWithCertHandling> {
-  Uint8List? _bytes;
-  bool _loading = true;
-  bool _error = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchBytes();
-  }
-
-  Future<void> _fetchBytes() async {
-    try {
-      if (!kReleaseMode) {
-        final ioc = HttpClient()
-          ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
-        final client = IOClient(ioc);
-        final resp = await client.get(Uri.parse(widget.imageUrl));
-        client.close();
-        if (resp.statusCode == 200) {
-          setState(() { _bytes = resp.bodyBytes; _loading = false; });
-          return;
-        }
-      } else {
-        final resp = await http.get(Uri.parse(widget.imageUrl));
-        if (resp.statusCode == 200) {
-          setState(() { _bytes = resp.bodyBytes; _loading = false; });
-          return;
-        }
-      }
-      setState(() { _error = true; _loading = false; });
-    } catch (e) {
-      setState(() { _error = true; _loading = false; });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_loading) return const Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator()));
-    if (_error || _bytes == null) return const Icon(Icons.broken_image, color: Color(0xFF03A297));
-    return Image.memory(_bytes!, fit: widget.fit);
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => MedicineDetailScreen(maThuoc: m.maThuoc),
+              ),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Image
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey[100]!),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child:
+                        (m.urlAnh != null && m.urlAnh!.isNotEmpty)
+                            ? Builder(
+                              builder: (_) {
+                                final s = m.urlAnh!.trim();
+                                final imageUrl =
+                                    (s.startsWith('http://') ||
+                                            s.startsWith('https://'))
+                                        ? s
+                                        : 'https://res.cloudinary.com/dmu0nknhg/image/upload/v1761064479/thuoc_images/thuoc/$s';
+                                return NetworkImageWithCertHandling(
+                                  imageUrl: imageUrl,
+                                  fit: BoxFit.cover,
+                                );
+                              },
+                            )
+                            : const Icon(
+                              Icons.medication,
+                              color: Color(0xFF03A297),
+                              size: 32,
+                            ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              m.tenThuoc,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF333333),
+                                height: 1.3,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            priceFormatter.format(price),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF333333),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        m.tenNCC ?? 'Đang cập nhật',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 8),
+                      // Optional: Add tags or stock status here if needed
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE0F2F1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          'Còn hàng',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Color(0xFF00695C),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

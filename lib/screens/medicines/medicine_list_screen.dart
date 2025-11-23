@@ -210,6 +210,7 @@ class _MedicineListScreenState extends State<MedicineListScreen> {
       itemCount: _filteredMedicines.length,
       itemBuilder: (_, i) {
         return _MedicineCard(
+          key: ValueKey(_filteredMedicines[i].maThuoc),
           medicine: _filteredMedicines[i],
           priceFormatter: _priceFormatter,
           onTap: () {
@@ -235,10 +236,11 @@ class _MedicineCard extends StatefulWidget {
   final VoidCallback onTap;
 
   const _MedicineCard({
+    Key? key,
     required this.medicine,
     required this.priceFormatter,
     required this.onTap,
-  });
+  }) : super(key: key);
 
   @override
   State<_MedicineCard> createState() => _MedicineCardState();
@@ -250,6 +252,18 @@ class _MedicineCardState extends State<_MedicineCard> {
   @override
   void initState() {
     super.initState();
+    _initSelected();
+  }
+
+  @override
+  void didUpdateWidget(_MedicineCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.medicine != oldWidget.medicine) {
+      _initSelected();
+    }
+  }
+
+  void _initSelected() {
     _selected = widget.medicine.giaThuocs.indexWhere((o) => o.soLuongCon > 0);
     if (_selected < 0) _selected = 0;
   }
@@ -278,6 +292,11 @@ class _MedicineCardState extends State<_MedicineCard> {
 
   @override
   Widget build(BuildContext context) {
+    // Safety check to prevent RangeError if data changes unexpectedly
+    if (_selected >= widget.medicine.giaThuocs.length) {
+      _selected = 0;
+    }
+
     final option =
         widget.medicine.giaThuocs.isEmpty
             ? null
