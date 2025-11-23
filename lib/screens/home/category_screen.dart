@@ -17,13 +17,11 @@ class CategoryScreen extends StatefulWidget {
 }
 
 class _CategoryScreenState extends State<CategoryScreen> {
-  // leftCategories now include id and title: {'id': maNhomLoai, 'title': tenNhomLoai}
   final List<Map<String, String>> _leftCategories = [];
   final List<String> _groupIds = [];
   final CategoryGroupService _service = CategoryGroupService();
   bool _loadingLeft = true;
   String? _errorMessage;
-  // Types for selected group
   List<CategoryType> _types = [];
   bool _loadingTypes = false;
   String? _typesError;
@@ -47,20 +45,12 @@ class _CategoryScreenState extends State<CategoryScreen> {
         _leftCategories.clear();
         _groupIds.clear();
         for (final g in groups) {
-          // store id separately so we can reliably access it by index
           _groupIds.add(g.maNhomLoai);
-          // also keep id in the leftCategories map so fallback works if needed
           _leftCategories.add({'id': g.maNhomLoai, 'title': g.tenNhomLoai});
         }
-        // debug
-        print('Loaded groups (${groups.length}): ${_groupIds}');
-        print('Left categories: ${_leftCategories}');
         _loadingLeft = false;
       });
 
-      // Auto-load types for first group if exists.
-      // Use _groupIds[0] directly to avoid any timing/fallback issue where the map
-      // entry might not yet contain 'id' when _onSelectGroup reads it.
       if (_groupIds.isNotEmpty) {
         int initialIndex = 0;
         if (widget.initialGroupId != null) {
@@ -71,7 +61,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
         }
 
         final firstId = _groupIds[initialIndex];
-        print('Auto-loading types for group id=$firstId (index=$initialIndex)');
         setState(() {
           _selectedIndex = initialIndex;
           _types = [];
@@ -87,7 +76,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
           });
         }
       } else if (_leftCategories.isNotEmpty) {
-        // Fallback to map-based selection if groupIds wasn't populated for some reason
         _onSelectGroup(0);
       }
     } catch (e) {
@@ -106,261 +94,27 @@ class _CategoryScreenState extends State<CategoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Subtle light gray background so tiles remain bright but page is not pure white
-      backgroundColor: const Color(0xFFF3F4F6),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
-            // Top search row
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              child: Row(
-                children: [
-                  // Back button removed as this is a main tab
-                  // IconButton(
-                  //   onPressed: () => Navigator.of(context).maybePop(),
-                  //   icon: const Icon(Icons.arrow_back_ios, size: 20),
-                  // ),
-                  Expanded(
-                    child: Container(
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(22),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Row(
-                        children: const [
-                          Icon(Icons.search, color: Colors.grey),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Tìm kiếm',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.camera_alt_outlined),
-                  ),
-                  Consumer<CartProvider>(
-                    builder:
-                        (_, cart, __) => Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            IconButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const CartScreen(),
-                                  ),
-                                );
-                              },
-                              icon: const Icon(Icons.shopping_bag_outlined),
-                            ),
-                            if (cart.items.isNotEmpty)
-                              Positioned(
-                                right: 8,
-                                top: 8,
-                                child: Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.red,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Text(
-                                    '${cart.items.length}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                  ),
-                ],
-              ),
-            ),
-
+            _buildHeader(),
             Expanded(
               child: Row(
                 children: [
-                  // Left vertical categories (from API) — take 2/7 of width
-                  Expanded(
-                    flex: 2,
-                    child: Container(
-                      color: Colors.transparent,
-                      child: _buildLeftContent(),
-                    ),
+                  // Left Sidebar
+                  Container(
+                    width: 100,
+                    color: Colors.white,
+                    child: _buildLeftContent(),
                   ),
-
-                  // Right content — take 5/7 of width
+                  // Vertical Divider
+                  Container(width: 1, color: Colors.grey[200]),
+                  // Right Content
                   Expanded(
-                    flex: 5,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Content area: list of types for selected group
-                        Expanded(
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(12),
-                            color: Colors.transparent,
-                            child:
-                                _loadingTypes
-                                    ? const Center(
-                                      child: CircularProgressIndicator(),
-                                    )
-                                    : _typesError != null
-                                    ? Center(child: Text('Lỗi: $_typesError'))
-                                    : LayoutBuilder(
-                                      builder: (context, constraints) {
-                                        // Add bottom padding to account for bottom navigation, FAB and safe area.
-                                        final mq = MediaQuery.of(context);
-                                        final safeBottom = mq.padding.bottom;
-                                        final bottomInset =
-                                            safeBottom +
-                                            kBottomNavigationBarHeight +
-                                            80;
-
-                                        // Compute tile aspect ratio so each tile fits without overflow.
-                                        const crossAxisCount = 3;
-                                        const spacing = 12.0;
-                                        final totalSpacing =
-                                            spacing * (crossAxisCount - 1);
-                                        final tileWidth =
-                                            (constraints.maxWidth -
-                                                totalSpacing) /
-                                            crossAxisCount;
-                                        // Desired tile height: icon (64) + spacing (6) + text box (36) + padding allowance (10)
-                                        const tileHeight =
-                                            64.0 + 6.0 + 36.0 + 10.0;
-                                        final childAspectRatio =
-                                            tileWidth / tileHeight;
-
-                                        return GridView.builder(
-                                          padding: EdgeInsets.only(
-                                            top: 8,
-                                            left: 0,
-                                            right: 0,
-                                            bottom: bottomInset,
-                                          ),
-                                          gridDelegate:
-                                              SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: crossAxisCount,
-                                                childAspectRatio:
-                                                    childAspectRatio,
-                                                crossAxisSpacing: spacing,
-                                                mainAxisSpacing: spacing,
-                                              ),
-                                          itemCount: _types.length,
-                                          itemBuilder: (context, i) {
-                                            final t = _types[i];
-                                            return Material(
-                                              color: Colors.transparent,
-                                              child: InkWell(
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                                onTap: () {
-                                                  // Navigate to medicines-by-type screen
-                                                  Navigator.of(context).push(
-                                                    MaterialPageRoute(
-                                                      builder:
-                                                          (
-                                                            _,
-                                                          ) => MedicinesByTypeScreen(
-                                                            maLoai:
-                                                                t.maLoaiThuoc,
-                                                            tenLoai:
-                                                                t.tenLoaiThuoc,
-                                                          ),
-                                                    ),
-                                                  );
-                                                },
-                                                child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.start,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.center,
-                                                  children: [
-                                                    Container(
-                                                      width: 64,
-                                                      height: 64,
-                                                      decoration: BoxDecoration(
-                                                        color: Colors.white,
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                              12,
-                                                            ),
-                                                        boxShadow: [
-                                                          BoxShadow(
-                                                            color: Colors.black
-                                                                .withOpacity(
-                                                                  0.04,
-                                                                ),
-                                                            blurRadius: 6,
-                                                            offset:
-                                                                const Offset(
-                                                                  0,
-                                                                  2,
-                                                                ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      child: Center(
-                                                        child: Icon(
-                                                          IconGenerator.getIconForMedicineType(
-                                                            t.tenLoaiThuoc,
-                                                          ),
-                                                          size: 40,
-                                                          color:
-                                                              IconGenerator.getColorForMedicineType(
-                                                                t.tenLoaiThuoc,
-                                                              ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 6),
-                                                    SizedBox(
-                                                      height: 36,
-                                                      child: Center(
-                                                        child: Text(
-                                                          t.tenLoaiThuoc,
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                          maxLines: 2,
-                                                          overflow:
-                                                              TextOverflow
-                                                                  .ellipsis,
-                                                          softWrap: true,
-                                                          style: const TextStyle(
-                                                            fontSize: 12,
-                                                            color:
-                                                                Colors.black87,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        );
-                                      },
-                                    ),
-                          ),
-                        ),
-                      ],
+                    child: Container(
+                      color: const Color(0xFFF5F7FA),
+                      child: _buildRightContent(),
                     ),
                   ),
                 ],
@@ -372,76 +126,159 @@ class _CategoryScreenState extends State<CategoryScreen> {
     );
   }
 
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                children: const [
+                  Icon(Icons.search, color: Colors.grey, size: 22),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Tìm kiếm danh mục...',
+                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Consumer<CartProvider>(
+            builder:
+                (_, cart, __) => Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const CartScreen()),
+                        );
+                      },
+                      icon: const Icon(
+                        Icons.shopping_bag_outlined,
+                        color: Color(0xFF023350),
+                      ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                    if (cart.items.isNotEmpty)
+                      Positioned(
+                        right: -4,
+                        top: -4,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            '${cart.items.length}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildLeftContent() {
     if (_loadingLeft) {
-      return const Center(
-        child: SizedBox(
-          width: 24,
-          height: 24,
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Center(child: CircularProgressIndicator(strokeWidth: 2));
     }
 
     if (_errorMessage != null) {
       return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.error_outline, color: Colors.red),
-            const SizedBox(height: 8),
-            const Text('Lỗi', style: TextStyle(color: Colors.red)),
-            const SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: _fetchCategories,
-              child: const Text('Thử lại'),
-            ),
-          ],
+        child: IconButton(
+          icon: const Icon(Icons.refresh, color: Color(0xFF03A297)),
+          onPressed: _fetchCategories,
         ),
       );
     }
 
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+    return ListView.builder(
+      padding: EdgeInsets.zero,
       itemCount: _leftCategories.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final item = _leftCategories[index];
         final selected = index == _selectedIndex;
         return InkWell(
           onTap: () => _onSelectGroup(index),
           child: Container(
-            width: 72,
-            height: 72,
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.06),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+              color: selected ? const Color(0xFFF0FDF9) : Colors.white,
               border:
                   selected
-                      ? Border.all(color: const Color(0xFF03A297), width: 1.6)
+                      ? const Border(
+                        left: BorderSide(color: Color(0xFF03A297), width: 4),
+                      )
                       : null,
             ),
-            alignment: Alignment.center,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6.0),
-              child: Text(
-                item['title'] ?? '',
-                textAlign: TextAlign.center,
-                maxLines: 3,
-                overflow: TextOverflow.visible,
-                softWrap: true,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: selected ? const Color(0xFF03A297) : Colors.black87,
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: selected ? Colors.white : Colors.grey[50],
+                    shape: BoxShape.circle,
+                    boxShadow:
+                        selected
+                            ? [
+                              BoxShadow(
+                                color: const Color(0xFF03A297).withOpacity(0.2),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ]
+                            : null,
+                  ),
+                  child: Icon(
+                    IconGenerator.getIconForMedicineType(item['title'] ?? ''),
+                    color:
+                        selected ? const Color(0xFF03A297) : Colors.grey[400],
+                    size: 20,
+                  ),
                 ),
-              ),
+                const SizedBox(height: 8),
+                Text(
+                  item['title'] ?? '',
+                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                    color:
+                        selected ? const Color(0xFF03A297) : Colors.grey[600],
+                  ),
+                ),
+              ],
             ),
           ),
         );
@@ -449,15 +286,118 @@ class _CategoryScreenState extends State<CategoryScreen> {
     );
   }
 
+  Widget _buildRightContent() {
+    if (_loadingTypes) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_typesError != null) {
+      return Center(child: Text('Lỗi: $_typesError'));
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final mq = MediaQuery.of(context);
+        final bottomInset = mq.padding.bottom + kBottomNavigationBarHeight + 80;
+
+        return GridView.builder(
+          padding: EdgeInsets.only(
+            top: 16,
+            left: 16,
+            right: 16,
+            bottom: bottomInset,
+          ),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 1.1,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+          ),
+          itemCount: _types.length,
+          itemBuilder: (context, i) {
+            final t = _types[i];
+            return _buildTypeCard(t);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildTypeCard(CategoryType t) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder:
+                    (_) => MedicinesByTypeScreen(
+                      maLoai: t.maLoaiThuoc,
+                      tenLoai: t.tenLoaiThuoc,
+                    ),
+              ),
+            );
+          },
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: IconGenerator.getColorForMedicineType(
+                    t.tenLoaiThuoc,
+                  ).withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  IconGenerator.getIconForMedicineType(t.tenLoaiThuoc),
+                  size: 24,
+                  color: IconGenerator.getColorForMedicineType(t.tenLoaiThuoc),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  t.tenLoaiThuoc,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF333333),
+                    height: 1.2,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _onSelectGroup(int index) {
     final item = _leftCategories[index];
-    // Prefer stored id list; fallback to map value if present
     final id =
         (index < _groupIds.length && _groupIds[index].isNotEmpty)
             ? _groupIds[index]
             : (item['id']);
-    // debug
-    print('Selecting group index=$index id=$id title=${item['title']}');
+
     setState(() {
       _selectedIndex = index;
       _types = [];
@@ -476,11 +416,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
   Future<void> _loadTypes(String maNhomLoai) async {
     try {
-      print('Loading types for group: $maNhomLoai');
       final types = await _service.getTypesByGroup(maNhomLoai);
       setState(() {
         _types = types;
-        print('Loaded types count: ${types.length}');
         _loadingTypes = false;
       });
     } catch (e) {
@@ -488,13 +426,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
         _typesError = e.toString();
         _loadingTypes = false;
       });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi khi lấy loại: $_typesError')),
-        );
-      }
     }
   }
-
-  // Bottom nav is extracted to AppBottomNavBar widget
 }

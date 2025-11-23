@@ -3,17 +3,15 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../providers/cart_provider.dart';
 import '../medicines/cart_screen.dart';
-import '../../utils/medicine_navigation.dart';
-import '../medicines/trusted_brand_screen.dart';
-import '../medicines/medicine_list_screen.dart';
-import 'category_screen.dart';
-import '../main_screen.dart';
 import 'package:quan_ly_nha_thuoc/models/categoryGroup/CategoryGroup.dart';
 import 'package:quan_ly_nha_thuoc/models/categoryGroup/CategoryGroup_service.dart';
 import 'package:quan_ly_nha_thuoc/services/thuoc_service.dart';
 import 'package:quan_ly_nha_thuoc/models/medicine_by_type.dart';
 import 'package:quan_ly_nha_thuoc/utils/icon_generator.dart';
 import '../medicines/medicine_detail_screen.dart';
+import '../medicines/medicine_list_screen.dart';
+import 'category_screen.dart';
+import '../main_screen.dart';
 
 class HomePageScreen extends StatefulWidget {
   const HomePageScreen({Key? key}) : super(key: key);
