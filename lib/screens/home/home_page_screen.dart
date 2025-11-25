@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../../providers/cart_provider.dart';
-import '../medicines/cart_screen.dart';
+
+import '../../providers/customer_provider.dart';
+
 import 'package:quan_ly_nha_thuoc/models/categoryGroup/CategoryGroup.dart';
 import 'package:quan_ly_nha_thuoc/models/categoryGroup/CategoryGroup_service.dart';
 import 'package:quan_ly_nha_thuoc/services/thuoc_service.dart';
@@ -11,9 +12,10 @@ import 'package:quan_ly_nha_thuoc/utils/icon_generator.dart';
 import '../medicines/medicine_detail_screen.dart';
 import '../medicines/medicine_list_screen.dart';
 import '../main_screen.dart';
+import '../../theme/app_theme.dart';
 
 class HomePageScreen extends StatefulWidget {
-  const HomePageScreen({Key? key}) : super(key: key);
+  const HomePageScreen({super.key});
 
   @override
   State<HomePageScreen> createState() => _HomePageScreenState();
@@ -73,7 +75,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
         child:
             _loading
@@ -100,11 +102,14 @@ class _HomePageScreenState extends State<HomePageScreen> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [const Color(0xFF023350), const Color(0xFF02294A)],
+          colors: [
+            AppTheme.primaryColor,
+            AppTheme.primaryColor.withOpacity(0.8),
+          ],
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF023350).withOpacity(0.3),
+            color: AppTheme.primaryColor.withOpacity(0.3),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -128,14 +133,14 @@ class _HomePageScreenState extends State<HomePageScreen> {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          const Color(0xFF03A297),
-                          const Color(0xFF028A7F),
+                          AppTheme.secondaryColor,
+                          AppTheme.secondaryColor.withOpacity(0.8),
                         ],
                       ),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF03A297).withOpacity(0.4),
+                          color: AppTheme.secondaryColor.withOpacity(0.4),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -233,12 +238,27 @@ class _HomePageScreenState extends State<HomePageScreen> {
                     children: [
                       Icon(
                         Icons.search,
-                        color: const Color(0xFF03A297),
+                        color: AppTheme.secondaryColor,
                         size: 22,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: TextField(
+                          textInputAction: TextInputAction.search,
+                          onSubmitted: (value) {
+                            if (value.trim().isNotEmpty) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (_) => MedicineListScreen(
+                                        title: "Kết quả tìm kiếm",
+                                        searchQuery: value.trim(),
+                                      ),
+                                ),
+                              );
+                            }
+                          },
                           decoration: InputDecoration(
                             hintText: 'Tìm kiếm thuốc, sản phẩm...',
                             border: InputBorder.none,
@@ -253,31 +273,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
-              Container(
-                height: 44,
-                width: 44,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [const Color(0xFF03A297), const Color(0xFF028A7F)],
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF03A297).withOpacity(0.4),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.camera_alt,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ),
             ],
           ),
 
@@ -287,81 +282,31 @@ class _HomePageScreenState extends State<HomePageScreen> {
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: Row(
               children: [
-                const Icon(
-                  Icons.location_on,
-                  color: Color(0xFF03A297),
-                  size: 20,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  'Giao hàng tới:',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
-                    fontSize: 13,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  'Hồ Chí Minh',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-                const Spacer(),
-                Consumer<CartProvider>(
-                  builder: (context, cart, child) {
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const CartScreen(),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              const Color(0xFF03A297),
-                              const Color(0xFF028A7F),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF03A297).withOpacity(0.4),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.shopping_cart,
-                              color: Colors.white,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              '${cart.items.length}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
+                Consumer<CustomerProvider>(
+                  builder: (context, customerProvider, child) {
+                    final hour = DateTime.now().hour;
+                    String greeting;
+                    if (hour >= 5 && hour < 12) {
+                      greeting = 'Chào buổi sáng';
+                    } else if (hour >= 12 && hour < 14) {
+                      greeting = 'Chào buổi trưa';
+                    } else if (hour >= 14 && hour < 18) {
+                      greeting = 'Chào buổi chiều';
+                    } else {
+                      greeting = 'Chào buổi tối';
+                    }
+
+                    final name = customerProvider.customer?.hoTen;
+                    if (name != null && name.isNotEmpty) {
+                      greeting += ', $name';
+                    }
+
+                    return Text(
+                      greeting,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
                       ),
                     );
                   },
@@ -389,7 +334,10 @@ class _HomePageScreenState extends State<HomePageScreen> {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [const Color(0xFF03A297), const Color(0xFF028A7F)],
+                    colors: [
+                      AppTheme.secondaryColor,
+                      AppTheme.secondaryColor.withOpacity(0.8),
+                    ],
                   ),
                   borderRadius: BorderRadius.circular(2),
                 ),
@@ -444,8 +392,8 @@ class _HomePageScreenState extends State<HomePageScreen> {
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
-                                const Color(0xFF023350),
-                                const Color(0xFF02294A),
+                                const Color(0xFF1565C0),
+                                const Color(0xFF0D47A1),
                               ],
                             ),
                           ),
@@ -484,8 +432,8 @@ class _HomePageScreenState extends State<HomePageScreen> {
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                           colors: [
-                            const Color(0xFF03A297),
-                            const Color(0xFF028A7F),
+                            AppTheme.secondaryColor,
+                            AppTheme.secondaryColor.withOpacity(0.8),
                           ],
                         )
                         : null,
@@ -514,7 +462,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                     width: 4,
                     height: 20,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF03A297),
+                      color: AppTheme.secondaryColor,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -531,11 +479,11 @@ class _HomePageScreenState extends State<HomePageScreen> {
               ),
               TextButton(
                 onPressed: () {
-                  MainScreen.of(context)?.setIndex(1);
+                  MainScreen.of(context)?.navigateToCategory(null);
                 },
                 child: const Text(
                   'Xem tất cả',
-                  style: TextStyle(color: Color(0xFF03A297)),
+                  style: TextStyle(color: AppTheme.secondaryColor),
                 ),
               ),
             ],
@@ -574,7 +522,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                         ),
                         child: Icon(
                           IconGenerator.getIconForMedicineType(cat.tenNhomLoai),
-                          color: const Color(0xFF03A297),
+                          color: AppTheme.secondaryColor,
                           size: 28,
                         ),
                       ),
@@ -613,7 +561,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                 width: 4,
                 height: 20,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF023350),
+                  color: AppTheme.primaryColor,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -641,7 +589,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                 },
                 child: const Text(
                   'Xem tất cả',
-                  style: TextStyle(color: Color(0xFF03A297)),
+                  style: TextStyle(color: AppTheme.secondaryColor),
                 ),
               ),
             ],
@@ -719,7 +667,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                           child: const Center(
                             child: Icon(
                               Icons.medication,
-                              color: Color(0xFF03A297),
+                              color: AppTheme.secondaryColor,
                               size: 40,
                             ),
                           ),
@@ -769,7 +717,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF03A297),
+                        backgroundColor: AppTheme.secondaryColor,
                         padding: EdgeInsets.zero,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),

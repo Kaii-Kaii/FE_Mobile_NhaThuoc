@@ -6,6 +6,7 @@ import 'package:quan_ly_nha_thuoc/providers/customer_provider.dart';
 import 'package:quan_ly_nha_thuoc/theme/app_theme.dart';
 import 'package:quan_ly_nha_thuoc/utils/constants.dart';
 import 'package:quan_ly_nha_thuoc/utils/validators.dart';
+import 'package:quan_ly_nha_thuoc/utils/snackbar_helper.dart';
 import 'package:quan_ly_nha_thuoc/widgets/custom_button.dart';
 import 'package:quan_ly_nha_thuoc/widgets/custom_text_field.dart';
 
@@ -108,12 +109,10 @@ class _LoginScreenState extends State<LoginScreen> {
         );
 
         if (!fetched && customerProvider.errorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(customerProvider.errorMessage!),
-              backgroundColor: AppTheme.errorColor,
-              behavior: SnackBarBehavior.floating,
-            ),
+          SnackBarHelper.show(
+            context,
+            customerProvider.errorMessage!,
+            type: SnackBarType.error,
           );
         }
 
@@ -144,12 +143,10 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       // Show error message
       if (authProvider.errorMessage != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(authProvider.errorMessage!),
-            backgroundColor: AppTheme.errorColor,
-            behavior: SnackBarBehavior.floating,
-          ),
+        SnackBarHelper.show(
+          context,
+          authProvider.errorMessage!,
+          type: SnackBarType.error,
         );
       }
     }
@@ -276,12 +273,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                 TextButton(
                                   onPressed: () {
                                     // TODO: Implement forgot password
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Chức năng đang phát triển',
-                                        ),
-                                      ),
+                                    SnackBarHelper.show(
+                                      context,
+                                      'Chức năng đang phát triển',
+                                      type: SnackBarType.info,
                                     );
                                   },
                                   child: const Text(
@@ -326,10 +321,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           icon: FontAwesomeIcons.google,
                           color: const Color(0xFFDB4437),
                           onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Chức năng đang phát triển'),
-                              ),
+                            SnackBarHelper.show(
+                              context,
+                              'Chức năng đang phát triển',
+                              type: SnackBarType.info,
                             );
                           },
                         ),
@@ -340,10 +335,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           icon: FontAwesomeIcons.facebook,
                           color: const Color(0xFF4267B2),
                           onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Chức năng đang phát triển'),
-                              ),
+                            SnackBarHelper.show(
+                              context,
+                              'Chức năng đang phát triển',
+                              type: SnackBarType.info,
                             );
                           },
                         ),

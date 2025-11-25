@@ -9,7 +9,6 @@ import 'package:quan_ly_nha_thuoc/screens/auth/customer_info_screen.dart';
 import 'package:quan_ly_nha_thuoc/screens/auth/login_screen.dart';
 import 'package:quan_ly_nha_thuoc/screens/auth/register_screen.dart';
 
-import 'package:quan_ly_nha_thuoc/screens/home/home_page_screen.dart';
 import 'package:quan_ly_nha_thuoc/screens/main_screen.dart';
 import 'package:quan_ly_nha_thuoc/theme/app_theme.dart';
 import 'package:quan_ly_nha_thuoc/utils/constants.dart';
@@ -54,7 +53,7 @@ class MyApp extends StatelessWidget {
         theme: AppTheme.lightTheme,
 
         // Start directly at MainScreen for development/testing
-        home: const MainScreen(),
+        home: MainScreen(key: MainScreen.globalKey),
 
         // Named routes
         routes: {
@@ -62,9 +61,11 @@ class MyApp extends StatelessWidget {
           AppConstants.registerRoute: (context) => const RegisterScreen(),
           AppConstants.customerInfoRoute:
               (context) => const CustomerInfoScreen(),
-          AppConstants.homeRoute: (context) => const MainScreen(),
+          AppConstants.homeRoute:
+              (context) => MainScreen(key: MainScreen.globalKey),
           AppConstants.accountRoute:
-              (context) => const MainScreen(initialIndex: 3),
+              (context) =>
+                  MainScreen(key: MainScreen.globalKey, initialIndex: 3),
         },
       ),
     );

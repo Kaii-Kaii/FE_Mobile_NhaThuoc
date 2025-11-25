@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../models/medicine_by_type.dart';
 import '../screens/medicines/medicine_list_screen.dart';
 import '../screens/medicines/medicine_detail_screen.dart';
 import '../screens/medicines/family_medicine_screen.dart';

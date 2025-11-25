@@ -4,13 +4,18 @@ import 'package:flutter/material.dart';
 /// Định nghĩa theme chung cho toàn bộ ứng dụng
 class AppTheme {
   // Color Scheme
-  static const Color primaryColor = Color(0xFF023350); // Dark Blue
-  static const Color secondaryColor = Color(0xFF03A297); // Teal
-  static const Color accentColor = Color(0xFFFF6B35); // Orange accent for highlights
+  // Color Scheme
+  static const Color primaryColor = Color(0xFF1565C0); // Blue 800
+  static const Color secondaryColor = Color(0xFF2196F3); // Blue 500
+  static const Color accentColor = Color(
+    0xFFFF6B35,
+  ); // Keep Orange for contrast
   static const Color errorColor = Color(0xFFDC3545);
   static const Color successColor = Color(0xFF28A745);
-  static const Color backgroundColor = Color(0xFFEFF5F9);
-  static const Color backgroundGradientEnd = Color(0xFFE0F2F0);
+  static const Color backgroundColor = Color(
+    0xFFF5F9FC,
+  ); // Very light blue-white
+  static const Color backgroundGradientEnd = Color(0xFFE1F5FE); // Light Blue 50
 
   // Text Colors
   static const Color textPrimaryColor = Color(0xFF333333);
@@ -115,7 +120,7 @@ class AppTheme {
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-      ),      // Text Theme
+      ), // Text Theme
       textTheme: const TextTheme(
         displayLarge: TextStyle(
           fontSize: 28,

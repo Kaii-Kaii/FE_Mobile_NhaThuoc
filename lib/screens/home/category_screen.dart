@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:quan_ly_nha_thuoc/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 import 'package:quan_ly_nha_thuoc/providers/cart_provider.dart';
-import '../medicines/cart_screen.dart';
+import '../main_screen.dart';
 import 'package:quan_ly_nha_thuoc/models/categoryGroup/CategoryGroup.dart';
 import 'package:quan_ly_nha_thuoc/models/categoryGroup/CategoryGroup_service.dart';
 import 'package:quan_ly_nha_thuoc/models/categoryGroup/CategoryType.dart';
 import 'package:quan_ly_nha_thuoc/utils/icon_generator.dart';
 import '../medicines/medicines_by_type_screen.dart';
+import '../medicines/medicine_list_screen.dart';
+import '../../utils/snackbar_helper.dart';
 
 class CategoryScreen extends StatefulWidget {
   final String? initialGroupId;
-  const CategoryScreen({Key? key, this.initialGroupId}) : super(key: key);
+  const CategoryScreen({super.key, this.initialGroupId});
 
   @override
   State<CategoryScreen> createState() => CategoryScreenState();
@@ -84,8 +87,10 @@ class CategoryScreenState extends State<CategoryScreen> {
         _errorMessage = e.toString();
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi khi lấy dữ liệu: $_errorMessage')),
+        SnackBarHelper.show(
+          context,
+          'Lỗi khi lấy dữ liệu: $_errorMessage',
+          type: SnackBarType.error,
         );
       }
     }
@@ -113,7 +118,7 @@ class CategoryScreenState extends State<CategoryScreen> {
                   // Right Content
                   Expanded(
                     child: Container(
-                      color: const Color(0xFFF5F7FA),
+                      color: AppTheme.backgroundColor,
                       child: _buildRightContent(),
                     ),
                   ),
@@ -135,6 +140,11 @@ class CategoryScreenState extends State<CategoryScreen> {
       ),
       child: Row(
         children: [
+          if (Navigator.canPop(context))
+            IconButton(
+              icon: const Icon(Icons.arrow_back, color: AppTheme.primaryColor),
+              onPressed: () => Navigator.pop(context),
+            ),
           Expanded(
             child: Container(
               height: 40,
@@ -144,13 +154,32 @@ class CategoryScreenState extends State<CategoryScreen> {
               ),
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Row(
-                children: const [
-                  Icon(Icons.search, color: Colors.grey, size: 22),
-                  SizedBox(width: 8),
+                children: [
+                  const Icon(Icons.search, color: Colors.grey, size: 22),
+                  const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      'Tìm kiếm danh mục...',
-                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                    child: TextField(
+                      textInputAction: TextInputAction.search,
+                      onSubmitted: (value) {
+                        if (value.trim().isNotEmpty) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => MedicineListScreen(
+                                    title: "Kết quả tìm kiếm",
+                                    searchQuery: value.trim(),
+                                  ),
+                            ),
+                          );
+                        }
+                      },
+                      decoration: const InputDecoration(
+                        hintText: 'Tìm kiếm danh mục...',
+                        border: InputBorder.none,
+                        hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
+                        contentPadding: EdgeInsets.only(bottom: 12),
+                      ),
                     ),
                   ),
                 ],
@@ -165,14 +194,12 @@ class CategoryScreenState extends State<CategoryScreen> {
                   children: [
                     IconButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const CartScreen()),
-                        );
+                        Navigator.popUntil(context, (route) => route.isFirst);
+                        MainScreen.globalKey.currentState?.setIndex(1);
                       },
                       icon: const Icon(
                         Icons.shopping_bag_outlined,
-                        color: Color(0xFF023350),
+                        color: AppTheme.primaryColor,
                       ),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
@@ -213,7 +240,7 @@ class CategoryScreenState extends State<CategoryScreen> {
     if (_errorMessage != null) {
       return Center(
         child: IconButton(
-          icon: const Icon(Icons.refresh, color: Color(0xFF03A297)),
+          icon: const Icon(Icons.refresh, color: AppTheme.secondaryColor),
           onPressed: _fetchCategories,
         ),
       );
@@ -229,11 +256,17 @@ class CategoryScreenState extends State<CategoryScreen> {
           onTap: () => _onSelectGroup(index),
           child: Container(
             decoration: BoxDecoration(
-              color: selected ? const Color(0xFFF0FDF9) : Colors.white,
+              color:
+                  selected
+                      ? AppTheme.secondaryColor.withOpacity(0.1)
+                      : Colors.white,
               border:
                   selected
                       ? const Border(
-                        left: BorderSide(color: Color(0xFF03A297), width: 4),
+                        left: BorderSide(
+                          color: AppTheme.secondaryColor,
+                          width: 4,
+                        ),
                       )
                       : null,
             ),
@@ -251,7 +284,7 @@ class CategoryScreenState extends State<CategoryScreen> {
                         selected
                             ? [
                               BoxShadow(
-                                color: const Color(0xFF03A297).withOpacity(0.2),
+                                color: AppTheme.secondaryColor.withOpacity(0.2),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
@@ -261,7 +294,7 @@ class CategoryScreenState extends State<CategoryScreen> {
                   child: Icon(
                     IconGenerator.getIconForMedicineType(item['title'] ?? ''),
                     color:
-                        selected ? const Color(0xFF03A297) : Colors.grey[400],
+                        selected ? AppTheme.secondaryColor : Colors.grey[400],
                     size: 20,
                   ),
                 ),
@@ -275,7 +308,7 @@ class CategoryScreenState extends State<CategoryScreen> {
                     fontSize: 11,
                     fontWeight: selected ? FontWeight.bold : FontWeight.normal,
                     color:
-                        selected ? const Color(0xFF03A297) : Colors.grey[600],
+                        selected ? AppTheme.secondaryColor : Colors.grey[600],
                   ),
                 ),
               ],

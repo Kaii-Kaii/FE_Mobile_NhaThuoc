@@ -8,22 +8,28 @@ import '../../services/thuoc_service.dart';
 import '../../providers/cart_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/network_image_cert.dart';
-import 'cart_screen.dart';
 import 'medicine_detail_screen.dart';
+import '../main_screen.dart';
+import '../../utils/snackbar_helper.dart';
 
 class MedicineListScreen extends StatefulWidget {
   final String? maLoaiThuoc;
   final String? title;
+  final String? searchQuery;
 
-  const MedicineListScreen({Key? key, this.maLoaiThuoc, this.title})
-    : super(key: key);
+  const MedicineListScreen({
+    super.key,
+    this.maLoaiThuoc,
+    this.title,
+    this.searchQuery,
+  });
   @override
   State<MedicineListScreen> createState() => _MedicineListScreenState();
 }
 
 class _MedicineListScreenState extends State<MedicineListScreen> {
   final ThuocService _service = ThuocService();
-  final TextEditingController _searchController = TextEditingController();
+  late final TextEditingController _searchController;
   final NumberFormat _priceFormatter = NumberFormat.currency(
     locale: 'vi_VN',
     symbol: '',
@@ -37,6 +43,7 @@ class _MedicineListScreenState extends State<MedicineListScreen> {
   @override
   void initState() {
     super.initState();
+    _searchController = TextEditingController(text: widget.searchQuery);
     _fetchMedicines();
     _searchController.addListener(_filter);
   }
@@ -124,10 +131,8 @@ class _MedicineListScreenState extends State<MedicineListScreen> {
               final count = cart.items.length;
               return IconButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const CartScreen()),
-                  );
+                  Navigator.popUntil(context, (route) => route.isFirst);
+                  MainScreen.globalKey.currentState?.setIndex(1);
                 },
                 icon: Stack(
                   clipBehavior: Clip.none,
@@ -236,11 +241,11 @@ class _MedicineCard extends StatefulWidget {
   final VoidCallback onTap;
 
   const _MedicineCard({
-    Key? key,
+    super.key,
     required this.medicine,
     required this.priceFormatter,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   State<_MedicineCard> createState() => _MedicineCardState();
@@ -396,15 +401,16 @@ class _MedicineCardState extends State<_MedicineCard> {
                             option: option,
                             quantity: 1,
                           );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                "Đã thêm ${widget.medicine.tenThuoc}",
-                              ),
-                            ),
+                          SnackBarHelper.show(
+                            context,
+                            "Đã thêm ${widget.medicine.tenThuoc}",
+                            type: SnackBarType.success,
                           );
                         },
-                        icon: const Icon(Icons.add_circle, color: Colors.blue),
+                        icon: const Icon(
+                          Icons.add_circle,
+                          color: AppTheme.secondaryColor,
+                        ),
                       ),
                     ],
                   ),

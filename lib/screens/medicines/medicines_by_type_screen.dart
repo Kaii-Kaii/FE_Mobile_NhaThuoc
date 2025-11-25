@@ -9,10 +9,10 @@ class MedicinesByTypeScreen extends StatefulWidget {
   final String maLoai;
   final String tenLoai;
   const MedicinesByTypeScreen({
-    Key? key,
+    super.key,
     required this.maLoai,
     required this.tenLoai,
-  }) : super(key: key);
+  });
 
   @override
   State<MedicinesByTypeScreen> createState() => _MedicinesByTypeScreenState();

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class SearchScreen extends StatelessWidget {
-  const SearchScreen({Key? key}) : super(key: key);
+  const SearchScreen({super.key});
 
   final List<String> _hotItems = const [
     'Omega 3',
@@ -55,7 +55,10 @@ class SearchScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () {},
-            child: const Text('Tìm kiếm', style: TextStyle(color: Colors.green)),
+            child: const Text(
+              'Tìm kiếm',
+              style: TextStyle(color: Colors.green),
+            ),
           ),
         ],
       ),
@@ -63,24 +66,33 @@ class SearchScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           const SizedBox(height: 4),
-          const Text('Tìm kiếm hàng đầu', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const Text(
+            'Tìm kiếm hàng đầu',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 12),
-          ..._hotItems.map((s) => Column(
-                children: [
-                  ListTile(
-                    leading: CircleAvatar(
-                      radius: 14,
-                      backgroundColor: Colors.grey.shade200,
-                      child: const Icon(Icons.timer, size: 16, color: Colors.black54),
+          ..._hotItems.map(
+            (s) => Column(
+              children: [
+                ListTile(
+                  leading: CircleAvatar(
+                    radius: 14,
+                    backgroundColor: Colors.grey.shade200,
+                    child: const Icon(
+                      Icons.timer,
+                      size: 16,
+                      color: Colors.black54,
                     ),
-                    title: Text(s),
-                    onTap: () {
-                      // handle item tap
-                    },
                   ),
-                  const Divider(height: 1),
-                ],
-              )),
+                  title: Text(s),
+                  onTap: () {
+                    // handle item tap
+                  },
+                ),
+                const Divider(height: 1),
+              ],
+            ),
+          ),
         ],
       ),
     );

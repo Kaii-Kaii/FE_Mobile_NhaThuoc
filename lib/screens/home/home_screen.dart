@@ -5,6 +5,7 @@ import 'package:quan_ly_nha_thuoc/providers/auth_provider.dart';
 import 'package:quan_ly_nha_thuoc/providers/customer_provider.dart';
 import 'package:quan_ly_nha_thuoc/theme/app_theme.dart';
 import 'package:quan_ly_nha_thuoc/utils/constants.dart';
+import 'package:quan_ly_nha_thuoc/utils/snackbar_helper.dart';
 
 /// Home Screen
 /// Màn hình chủ với thông tin người dùng và chức năng đăng xuất
@@ -382,8 +383,10 @@ class HomeScreen extends StatelessWidget {
               title: 'Đặt hàng',
               color: AppTheme.primaryColor,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Chức năng đang phát triển')),
+                SnackBarHelper.show(
+                  context,
+                  'Chức năng đang phát triển',
+                  type: SnackBarType.info,
                 );
               },
             ),
@@ -392,8 +395,10 @@ class HomeScreen extends StatelessWidget {
               title: 'Lịch sử',
               color: AppTheme.secondaryColor,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Chức năng đang phát triển')),
+                SnackBarHelper.show(
+                  context,
+                  'Chức năng đang phát triển',
+                  type: SnackBarType.info,
                 );
               },
             ),
@@ -402,8 +407,10 @@ class HomeScreen extends StatelessWidget {
               title: 'Ưu đãi',
               color: Colors.orange,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Chức năng đang phát triển')),
+                SnackBarHelper.show(
+                  context,
+                  'Chức năng đang phát triển',
+                  type: SnackBarType.info,
                 );
               },
             ),
@@ -412,8 +419,10 @@ class HomeScreen extends StatelessWidget {
               title: 'Hỗ trợ',
               color: Colors.green,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Chức năng đang phát triển')),
+                SnackBarHelper.show(
+                  context,
+                  'Chức năng đang phát triển',
+                  type: SnackBarType.info,
                 );
               },
             ),

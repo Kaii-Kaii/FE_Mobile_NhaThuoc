@@ -5,6 +5,7 @@ import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../providers/cart_provider.dart';
 import '../../models/cart_item_model.dart'; // CartEntry
+import '../../utils/snackbar_helper.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -308,11 +309,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   //==========================================================
   void _submitOrder() {
     if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Đặt hàng thành công!"),
-          backgroundColor: AppTheme.secondaryColor,
-        ),
+      SnackBarHelper.show(
+        context,
+        "Đặt hàng thành công!",
+        type: SnackBarType.success,
       );
     }
   }

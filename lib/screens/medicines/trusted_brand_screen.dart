@@ -4,7 +4,7 @@ import '../../providers/cart_provider.dart';
 import 'cart_screen.dart';
 
 class TrustedBrandScreen extends StatefulWidget {
-  const TrustedBrandScreen({Key? key}) : super(key: key);
+  const TrustedBrandScreen({super.key});
 
   @override
   State<TrustedBrandScreen> createState() => _TrustedBrandScreenState();
@@ -140,7 +140,7 @@ class _TrustedBrandScreenState extends State<TrustedBrandScreen> {
         children: [
           _buildBannerHeader(),
           const SizedBox(height: 16),
-          ..._trustedBrands.map((brand) => _buildBrandSection(brand)).toList(),
+          ..._trustedBrands.map((brand) => _buildBrandSection(brand)),
           _buildPharmacyBanner(),
         ],
       ),

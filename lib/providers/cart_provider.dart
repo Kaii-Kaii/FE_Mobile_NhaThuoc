@@ -34,9 +34,9 @@ class CartProvider extends ChangeNotifier {
           optionId: option?.maGiaThuoc,
           unitId: option?.maLoaiDonVi,
           unitName: option?.tenLoaiDonVi ?? medicine.tenLoaiDonVi ?? "Đơn vị",
-          unitQuantity: option?.soLuong?.toInt(),
+          unitQuantity: option?.soLuong.toInt(),
           price: option?.donGia ?? medicine.donGiaSi ?? 0,
-          availableQuantity: option?.soLuongCon?.toInt(),
+          availableQuantity: option?.soLuongCon.toInt(),
           quantity: quantity,
         ),
       );

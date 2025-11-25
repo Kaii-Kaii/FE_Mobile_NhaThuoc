@@ -9,10 +9,10 @@ class NetworkImageWithCertHandling extends StatefulWidget {
   final String imageUrl;
   final BoxFit fit;
   const NetworkImageWithCertHandling({
-    Key? key,
+    super.key,
     required this.imageUrl,
     this.fit = BoxFit.cover,
-  }) : super(key: key);
+  });
 
   @override
   State<NetworkImageWithCertHandling> createState() =>
@@ -78,7 +78,7 @@ class _NetworkImageWithCertHandlingState
 
   @override
   Widget build(BuildContext context) {
-    if (_loading)
+    if (_loading) {
       return const Center(
         child: SizedBox(
           width: 24,
@@ -86,8 +86,10 @@ class _NetworkImageWithCertHandlingState
           child: CircularProgressIndicator(),
         ),
       );
-    if (_error || _bytes == null)
+    }
+    if (_error || _bytes == null) {
       return const Icon(Icons.broken_image, color: Color(0xFF03A297));
+    }
     return Image.memory(_bytes!, fit: widget.fit);
   }
 }

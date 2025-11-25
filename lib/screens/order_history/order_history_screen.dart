@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quan_ly_nha_thuoc/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:quan_ly_nha_thuoc/models/order_history_model.dart';
@@ -8,7 +9,7 @@ import 'package:quan_ly_nha_thuoc/screens/home/account_screen.dart';
 import 'package:quan_ly_nha_thuoc/screens/order_history/invoice_detail_screen.dart';
 
 class OrderHistoryScreen extends StatefulWidget {
-  const OrderHistoryScreen({Key? key}) : super(key: key);
+  const OrderHistoryScreen({super.key});
 
   @override
   State<OrderHistoryScreen> createState() => OrderHistoryScreenState();
@@ -44,25 +45,27 @@ class OrderHistoryScreenState extends State<OrderHistoryScreen> {
   }
 
   Color _getStatusColor(int status) {
+    if (status < 0) return AppTheme.errorColor;
     switch (status) {
-      case -1:
-        return Colors.red;
       case 0:
         return Colors.orange;
       case 1:
-        return Colors.blue;
+        return AppTheme.secondaryColor;
       case 2:
         return Colors.purple;
       case 3:
-        return Colors.green;
+        return AppTheme.successColor;
       default:
         return Colors.grey;
     }
   }
 
-  Widget _buildOrderList(List<OrderHistoryModel> allOrders, int status) {
+  Widget _buildOrderList(
+    List<OrderHistoryModel> allOrders,
+    List<int> statuses,
+  ) {
     final filteredOrders =
-        allOrders.where((o) => o.trangThaiGiaoHang == status).toList();
+        allOrders.where((o) => statuses.contains(o.trangThaiGiaoHang)).toList();
 
     if (filteredOrders.isEmpty) {
       return const Center(child: Text('Không có đơn hàng nào.'));
@@ -158,7 +161,7 @@ class OrderHistoryScreenState extends State<OrderHistoryScreen> {
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: Color(0xFF03A297),
+                          color: AppTheme.secondaryColor,
                         ),
                       ),
                     ],
@@ -201,7 +204,7 @@ class OrderHistoryScreenState extends State<OrderHistoryScreen> {
             'Lịch sử đơn hàng',
             style: TextStyle(color: Colors.white),
           ),
-          backgroundColor: const Color(0xFF03A297),
+          backgroundColor: AppTheme.primaryColor,
           iconTheme: const IconThemeData(color: Colors.white),
           centerTitle: true,
           bottom: const TabBar(
@@ -231,11 +234,11 @@ class OrderHistoryScreenState extends State<OrderHistoryScreen> {
 
             return TabBarView(
               children: [
-                _buildOrderList(orders, -1),
-                _buildOrderList(orders, 0),
-                _buildOrderList(orders, 1),
-                _buildOrderList(orders, 2),
-                _buildOrderList(orders, 3),
+                _buildOrderList(orders, [-1, -2, -3]),
+                _buildOrderList(orders, [0]),
+                _buildOrderList(orders, [1]),
+                _buildOrderList(orders, [2]),
+                _buildOrderList(orders, [3]),
               ],
             );
           },

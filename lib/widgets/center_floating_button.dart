@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:quan_ly_nha_thuoc/theme/app_theme.dart';
+import 'package:quan_ly_nha_thuoc/utils/snackbar_helper.dart';
 
 class CenterFloatingButton extends StatelessWidget {
-  const CenterFloatingButton({Key? key}) : super(key: key);
+  const CenterFloatingButton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -10,14 +12,14 @@ class CenterFloatingButton extends StatelessWidget {
       height: 64,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF03A297), Color(0xFF028A7F)],
+          colors: [AppTheme.secondaryColor, AppTheme.primaryColor],
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF03A297).withOpacity(0.5),
+            color: AppTheme.secondaryColor.withOpacity(0.5),
             spreadRadius: 2,
             blurRadius: 12,
             offset: const Offset(0, 4),
@@ -29,8 +31,10 @@ class CenterFloatingButton extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Chat sẽ được cập nhật sớm.')),
+            SnackBarHelper.show(
+              context,
+              'Chat sẽ được cập nhật sớm.',
+              type: SnackBarType.info,
             );
           },
           customBorder: const CircleBorder(),

@@ -14,8 +14,10 @@ Future<void> main() async {
     print('\nTrying $h');
     final uri = Uri.parse(h);
 
-    final httpClient = HttpClient()
-      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+    final httpClient =
+        HttpClient()
+          ..badCertificateCallback =
+              (X509Certificate cert, String host, int port) => true;
 
     try {
       final request = await httpClient.getUrl(uri);
@@ -24,7 +26,9 @@ Future<void> main() async {
 
       final body = await utf8.decoder.bind(response).join();
       print('Status: ${response.statusCode}');
-      print('Body (truncated): ${body.length > 2000 ? body.substring(0, 2000) + "..." : body}');
+      print(
+        'Body (truncated): ${body.length > 2000 ? "${body.substring(0, 2000)}..." : body}',
+      );
 
       if (response.statusCode == 200) {
         final parsed = json.decode(body);
@@ -32,7 +36,9 @@ Future<void> main() async {
           final list = parsed['data'] as List;
           print('Parsed ${list.length} items:');
           for (var item in list) {
-            print(' - ${item['maLoaiThuoc']} : ${item['tenLoaiThuoc']} (icon=${item['icon']})');
+            print(
+              ' - ${item['maLoaiThuoc']} : ${item['tenLoaiThuoc']} (icon=${item['icon']})',
+            );
           }
         } else if (parsed is List) {
           print('Parsed list with ${parsed.length} items');

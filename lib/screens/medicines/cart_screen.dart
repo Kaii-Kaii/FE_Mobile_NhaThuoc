@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:quan_ly_nha_thuoc/utils/snackbar_helper.dart';
 import '../../models/cart_item_model.dart';
 import '../../models/order_request.dart';
 import '../../providers/cart_provider.dart';
@@ -388,6 +389,6 @@ class CartScreen extends StatelessWidget {
   }
 
   void _showSnack(BuildContext context, String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    SnackBarHelper.show(context, msg, type: SnackBarType.error);
   }
 }

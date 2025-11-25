@@ -6,8 +6,7 @@ import 'package:quan_ly_nha_thuoc/services/order_service.dart';
 class InvoiceDetailScreen extends StatefulWidget {
   final String invoiceId;
 
-  const InvoiceDetailScreen({Key? key, required this.invoiceId})
-    : super(key: key);
+  const InvoiceDetailScreen({super.key, required this.invoiceId});
 
   @override
   State<InvoiceDetailScreen> createState() => _InvoiceDetailScreenState();

@@ -5,7 +5,7 @@ import '../../models/medicine_by_type.dart';
 import '../medicines/medicine_detail_screen.dart';
 
 class FamilyMedicineScreen extends StatefulWidget {
-  const FamilyMedicineScreen({Key? key}) : super(key: key);
+  const FamilyMedicineScreen({super.key});
 
   @override
   State<FamilyMedicineScreen> createState() => _FamilyMedicineScreenState();

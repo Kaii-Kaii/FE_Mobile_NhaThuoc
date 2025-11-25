@@ -6,6 +6,7 @@ import 'package:quan_ly_nha_thuoc/providers/customer_provider.dart';
 import 'package:quan_ly_nha_thuoc/theme/app_theme.dart';
 import 'package:quan_ly_nha_thuoc/utils/constants.dart';
 import 'package:quan_ly_nha_thuoc/utils/validators.dart';
+import 'package:quan_ly_nha_thuoc/utils/snackbar_helper.dart';
 import 'package:quan_ly_nha_thuoc/widgets/custom_button.dart';
 import 'package:quan_ly_nha_thuoc/widgets/custom_text_field.dart';
 
@@ -108,13 +109,7 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
     // Validate date
     final dateError = Validators.validateDateOfBirth(_selectedDate);
     if (dateError != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(dateError),
-          backgroundColor: AppTheme.errorColor,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      SnackBarHelper.show(context, dateError, type: SnackBarType.error);
       return;
     }
 
@@ -140,12 +135,10 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
     } else {
       // Show error message
       if (customerProvider.errorMessage != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(customerProvider.errorMessage!),
-            backgroundColor: AppTheme.errorColor,
-            behavior: SnackBarBehavior.floating,
-          ),
+        SnackBarHelper.show(
+          context,
+          customerProvider.errorMessage!,
+          type: SnackBarType.error,
         );
       }
     }

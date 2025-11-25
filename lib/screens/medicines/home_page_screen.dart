@@ -4,7 +4,7 @@ import '../../utils/medicine_navigation.dart';
 import 'medicine_list_screen.dart';
 
 class HomePageScreen extends StatefulWidget {
-  const HomePageScreen({Key? key}) : super(key: key);
+  const HomePageScreen({super.key});
 
   @override
   State<HomePageScreen> createState() => _HomePageScreenState();
@@ -38,9 +38,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.only(top: 45, left: 16, right: 16, bottom: 10),
-      decoration: const BoxDecoration(
-        color: Color(0xFF023350),
-      ),
+      decoration: const BoxDecoration(color: Color(0xFF023350)),
       child: Row(
         children: [
           const CircleAvatar(
@@ -87,9 +85,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
   Widget _buildSearchBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: const BoxDecoration(
-        color: Color(0xFF023350),
-      ),
+      decoration: const BoxDecoration(color: Color(0xFF023350)),
       child: Column(
         children: [
           Container(
@@ -120,7 +116,11 @@ class _HomePageScreenState extends State<HomePageScreen> {
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
+                    icon: const Icon(
+                      Icons.camera_alt,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                     onPressed: () {},
                   ),
                 ),
@@ -146,7 +146,10 @@ class _HomePageScreenState extends State<HomePageScreen> {
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF03A297),
                   borderRadius: BorderRadius.circular(12),
@@ -157,7 +160,10 @@ class _HomePageScreenState extends State<HomePageScreen> {
                     SizedBox(width: 5),
                     Text(
                       '0',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -191,10 +197,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
         children: [
           const Text(
             'Chào mừng đến với Nhà thuốc An Khang',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           Row(
@@ -279,13 +282,16 @@ class _HomePageScreenState extends State<HomePageScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: actions
-                .map((action) => _buildQuickActionItem(
-                      icon: action['icon'],
-                      color: action['color'],
-                      label: action['label'],
-                    ))
-                .toList(),
+            children:
+                actions
+                    .map(
+                      (action) => _buildQuickActionItem(
+                        icon: action['icon'],
+                        color: action['color'],
+                        label: action['label'],
+                      ),
+                    )
+                    .toList(),
           ),
         ),
         const SizedBox(height: 16),
@@ -444,10 +450,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            color: isSelected ? const Color(0xFF03A297) : Colors.grey,
-          ),
+          Icon(icon, color: isSelected ? const Color(0xFF03A297) : Colors.grey),
           Text(
             label,
             style: TextStyle(

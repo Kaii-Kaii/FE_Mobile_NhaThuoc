@@ -7,6 +7,7 @@ import 'package:quan_ly_nha_thuoc/providers/auth_provider.dart';
 import 'package:quan_ly_nha_thuoc/providers/customer_provider.dart';
 import 'package:quan_ly_nha_thuoc/theme/app_theme.dart';
 import 'package:quan_ly_nha_thuoc/utils/constants.dart';
+import 'package:quan_ly_nha_thuoc/utils/snackbar_helper.dart';
 import 'package:quan_ly_nha_thuoc/widgets/custom_button.dart';
 
 /// Account Screen
@@ -90,8 +91,10 @@ class _AccountScreenState extends State<AccountScreen> {
 
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Bạn đã đăng xuất thành công.')),
+    SnackBarHelper.show(
+      context,
+      'Bạn đã đăng xuất thành công.',
+      type: SnackBarType.success,
     );
   }
 
@@ -115,7 +118,7 @@ class _AccountScreenState extends State<AccountScreen> {
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(20),
               children: [
-                _buildWelcomeCard(authProvider.user),
+                _buildWelcomeCard(authProvider.user, customerProvider.customer),
                 const SizedBox(height: 20),
                 _buildAccountInfoCard(authProvider.user),
                 const SizedBox(height: 20),
@@ -156,8 +159,8 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  Widget _buildWelcomeCard(UserModel? user) {
-    final displayName = user?.tenDangNhap ?? 'Khách hàng';
+  Widget _buildWelcomeCard(UserModel? user, CustomerModel? customer) {
+    final displayName = customer?.hoTen ?? user?.tenDangNhap ?? 'Khách hàng';
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(

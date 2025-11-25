@@ -8,6 +8,7 @@ import '../../models/medicine_detail.dart';
 import '../../models/medicine_price_option.dart';
 import '../../providers/cart_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/snackbar_helper.dart';
 
 class MedicineDetailScreen extends StatefulWidget {
   final String maThuoc;
@@ -497,7 +498,7 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
                       fontSize: 13,
                       color:
                           isOutOfStock
-                              ? Colors.redAccent
+                              ? AppTheme.errorColor
                               : AppTheme.textSecondaryColor,
                     ),
                   ),
@@ -535,12 +536,10 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
                                 quantity: _qty,
                               );
 
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Đã thêm ${mapped.tenThuoc} (${option.tenLoaiDonVi}) x$_qty',
-                                  ),
-                                ),
+                              SnackBarHelper.show(
+                                context,
+                                'Đã thêm ${mapped.tenThuoc} (${option.tenLoaiDonVi}) x$_qty',
+                                type: SnackBarType.success,
                               );
                             },
                     child: Text(
@@ -617,7 +616,7 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
       decoration: BoxDecoration(
         color:
             highlight
-                ? Colors.redAccent.withOpacity(0.12)
+                ? AppTheme.errorColor.withOpacity(0.12)
                 : AppTheme.primaryColor.withOpacity(0.06),
         borderRadius: BorderRadius.circular(16),
       ),
@@ -628,7 +627,7 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
           Icon(
             icon,
             size: 18,
-            color: highlight ? Colors.redAccent : AppTheme.primaryColor,
+            color: highlight ? AppTheme.errorColor : AppTheme.primaryColor,
           ),
           const SizedBox(width: 8),
           Column(
@@ -640,7 +639,7 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
                   fontSize: 11,
                   color:
                       highlight
-                          ? Colors.redAccent
+                          ? AppTheme.errorColor
                           : AppTheme.textSecondaryColor,
                 ),
               ),
@@ -650,7 +649,9 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color:
-                      highlight ? Colors.redAccent : AppTheme.textPrimaryColor,
+                      highlight
+                          ? AppTheme.errorColor
+                          : AppTheme.textPrimaryColor,
                 ),
               ),
             ],

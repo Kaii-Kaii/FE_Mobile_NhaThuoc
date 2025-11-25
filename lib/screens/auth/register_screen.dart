@@ -4,6 +4,7 @@ import 'package:quan_ly_nha_thuoc/providers/auth_provider.dart';
 import 'package:quan_ly_nha_thuoc/theme/app_theme.dart';
 import 'package:quan_ly_nha_thuoc/utils/constants.dart';
 import 'package:quan_ly_nha_thuoc/utils/validators.dart';
+import 'package:quan_ly_nha_thuoc/utils/snackbar_helper.dart';
 import 'package:quan_ly_nha_thuoc/widgets/custom_button.dart';
 import 'package:quan_ly_nha_thuoc/widgets/custom_text_field.dart';
 
@@ -55,12 +56,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (success) {
       // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(AppConstants.registerSuccess),
-          backgroundColor: AppTheme.successColor,
-          behavior: SnackBarBehavior.floating,
-        ),
+      // Show success message
+      SnackBarHelper.show(
+        context,
+        AppConstants.registerSuccess,
+        type: SnackBarType.success,
       );
 
       // Navigate to login screen
@@ -68,12 +68,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     } else {
       // Show error message
       if (authProvider.errorMessage != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(authProvider.errorMessage!),
-            backgroundColor: AppTheme.errorColor,
-            behavior: SnackBarBehavior.floating,
-          ),
+        SnackBarHelper.show(
+          context,
+          authProvider.errorMessage!,
+          type: SnackBarType.error,
         );
       }
     }
