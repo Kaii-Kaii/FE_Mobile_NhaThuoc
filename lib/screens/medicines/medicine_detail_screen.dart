@@ -369,7 +369,7 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
               .map(
                 (s) => Padding(
                   padding: const EdgeInsets.only(bottom: 18),
-                  child: _detailCard(
+                  child: ExpandableDetailCard(
                     title: s['title'] as String,
                     content: s['content'] as String,
                     icon: s['icon'] as IconData,
@@ -377,64 +377,6 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
                 ),
               )
               .toList(),
-    );
-  }
-
-  Widget _detailCard({
-    required String title,
-    required String content,
-    required IconData icon,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 18,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryColor.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Icon(icon, color: AppTheme.primaryColor, size: 20),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.textPrimaryColor,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              content,
-              style: TextStyle(
-                fontSize: 14,
-                height: 1.6,
-                color: AppTheme.textSecondaryColor,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -668,5 +610,112 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
 
   String _formatCurrency(num value) {
     return '${_currencyFormatter.format(value).trim()} đ';
+  }
+}
+
+class ExpandableDetailCard extends StatefulWidget {
+  final String title;
+  final String content;
+  final IconData icon;
+
+  const ExpandableDetailCard({
+    super.key,
+    required this.title,
+    required this.content,
+    required this.icon,
+  });
+
+  @override
+  State<ExpandableDetailCard> createState() => _ExpandableDetailCardState();
+}
+
+class _ExpandableDetailCardState extends State<ExpandableDetailCard> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(24),
+        child: InkWell(
+          onTap: () => setState(() => _isExpanded = !_isExpanded),
+          borderRadius: BorderRadius.circular(24),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryColor.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Icon(
+                        widget.icon,
+                        color: AppTheme.primaryColor,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        widget.title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.textPrimaryColor,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      _isExpanded
+                          ? Icons.keyboard_arrow_up_rounded
+                          : Icons.keyboard_arrow_down_rounded,
+                      color: AppTheme.textSecondaryColor,
+                    ),
+                  ],
+                ),
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  child: SizedBox(
+                    width: double.infinity,
+                    child:
+                        _isExpanded
+                            ? Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: Text(
+                                widget.content,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  height: 1.6,
+                                  color: AppTheme.textSecondaryColor,
+                                ),
+                              ),
+                            )
+                            : null,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
