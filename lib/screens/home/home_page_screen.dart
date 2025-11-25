@@ -10,7 +10,6 @@ import 'package:quan_ly_nha_thuoc/models/medicine_by_type.dart';
 import 'package:quan_ly_nha_thuoc/utils/icon_generator.dart';
 import '../medicines/medicine_detail_screen.dart';
 import '../medicines/medicine_list_screen.dart';
-import 'category_screen.dart';
 import '../main_screen.dart';
 
 class HomePageScreen extends StatefulWidget {
@@ -552,13 +551,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
               final cat = _categories[index];
               return GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (_) => CategoryScreen(initialGroupId: cat.maNhomLoai),
-                    ),
-                  );
+                  MainScreen.of(context)?.navigateToCategory(cat.maNhomLoai);
                 },
                 child: Container(
                   width: 80,

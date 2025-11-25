@@ -13,10 +13,10 @@ class CategoryScreen extends StatefulWidget {
   const CategoryScreen({Key? key, this.initialGroupId}) : super(key: key);
 
   @override
-  State<CategoryScreen> createState() => _CategoryScreenState();
+  State<CategoryScreen> createState() => CategoryScreenState();
 }
 
-class _CategoryScreenState extends State<CategoryScreen> {
+class CategoryScreenState extends State<CategoryScreen> {
   final List<Map<String, String>> _leftCategories = [];
   final List<String> _groupIds = [];
   final CategoryGroupService _service = CategoryGroupService();
@@ -426,6 +426,13 @@ class _CategoryScreenState extends State<CategoryScreen> {
         _typesError = e.toString();
         _loadingTypes = false;
       });
+    }
+  }
+
+  void selectCategoryById(String groupId) {
+    final index = _groupIds.indexOf(groupId);
+    if (index != -1) {
+      _onSelectGroup(index);
     }
   }
 }

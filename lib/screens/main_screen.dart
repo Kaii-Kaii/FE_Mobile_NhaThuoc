@@ -21,6 +21,7 @@ class MainScreen extends StatefulWidget {
 class MainScreenState extends State<MainScreen> {
   late int _selectedIndex;
   final GlobalKey<OrderHistoryScreenState> _orderHistoryKey = GlobalKey();
+  final GlobalKey<CategoryScreenState> _categoryScreenKey = GlobalKey();
   late final List<Widget> _screens;
 
   @override
@@ -29,7 +30,7 @@ class MainScreenState extends State<MainScreen> {
     _selectedIndex = widget.initialIndex;
     _screens = [
       const HomePageScreen(),
-      const CategoryScreen(),
+      CategoryScreen(key: _categoryScreenKey),
       OrderHistoryScreen(key: _orderHistoryKey),
       const AccountScreen(),
     ];
@@ -42,6 +43,13 @@ class MainScreenState extends State<MainScreen> {
     if (index == 2) {
       _orderHistoryKey.currentState?.refresh();
     }
+  }
+
+  void navigateToCategory(String groupId) {
+    setState(() {
+      _selectedIndex = 1;
+    });
+    _categoryScreenKey.currentState?.selectCategoryById(groupId);
   }
 
   @override
