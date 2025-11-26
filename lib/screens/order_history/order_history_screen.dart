@@ -60,6 +60,71 @@ class OrderHistoryScreenState extends State<OrderHistoryScreen> {
     }
   }
 
+  Future<void> _showCancelDialog(String maHD) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Xác nhận hủy đơn'),
+            content: Text('Bạn có chắc chắn muốn hủy đơn hàng $maHD không?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Đóng'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                child: const Text(
+                  'Hủy đơn',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+    );
+
+    if (confirm == true) {
+      try {
+        await _orderService.cancelOrder(maHD);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text(
+                'Đã hủy đơn hàng thành công',
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: AppTheme.successColor,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              margin: const EdgeInsets.all(16),
+            ),
+          );
+          refresh();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Lỗi: $e',
+                style: const TextStyle(color: Colors.white),
+              ),
+              backgroundColor: AppTheme.errorColor,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              margin: const EdgeInsets.all(16),
+            ),
+          );
+        }
+      }
+    }
+  }
+
   Widget _buildOrderList(
     List<OrderHistoryModel> allOrders,
     List<int> statuses,
@@ -181,6 +246,23 @@ class OrderHistoryScreenState extends State<OrderHistoryScreen> {
                               fontStyle: FontStyle.italic,
                             ),
                           ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  if (order.trangThaiGiaoHang == 0) ...[
+                    const SizedBox(height: 12),
+                    const Divider(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        OutlinedButton(
+                          onPressed: () => _showCancelDialog(order.maHD),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.red,
+                            side: const BorderSide(color: Colors.red),
+                          ),
+                          child: const Text('Hủy đơn'),
                         ),
                       ],
                     ),

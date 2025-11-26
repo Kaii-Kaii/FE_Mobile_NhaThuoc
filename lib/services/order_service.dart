@@ -89,6 +89,17 @@ class OrderService {
       throw Exception(ApiService.handleError(e));
     }
   }
+
+  Future<void> cancelOrder(String maHD) async {
+    try {
+      await _apiService.patch(
+        '/HoaDon/UpdateStatus',
+        data: {'maHD': maHD, 'trangThaiGiaoHang': -1},
+      );
+    } catch (e) {
+      throw Exception(ApiService.handleError(e));
+    }
+  }
 }
 
 String? _extractMaHd(dynamic payload) {

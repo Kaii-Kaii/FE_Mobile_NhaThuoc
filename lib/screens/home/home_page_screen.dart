@@ -59,12 +59,17 @@ class _HomePageScreenState extends State<HomePageScreen> {
     try {
       final groups = await _categoryService.getAllCategoryGroups();
       final medicines = await _medicineService.getAll();
+
+      if (!mounted) return;
+
       setState(() {
         _categories = groups;
         _featuredMedicines = medicines.take(10).toList();
         _loading = false;
       });
     } catch (e) {
+      if (!mounted) return;
+
       setState(() {
         _error = e.toString();
         _loading = false;

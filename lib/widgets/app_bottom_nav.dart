@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:quan_ly_nha_thuoc/providers/cart_provider.dart';
 import 'package:quan_ly_nha_thuoc/theme/app_theme.dart';
 
 typedef NavItemSelected = void Function(int index);
@@ -25,27 +27,89 @@ class AppBottomNavBar extends StatelessWidget implements PreferredSizeWidget {
 
     Widget buildItem(int i, IconData icon, String label) {
       final active = i == activeIndex;
+
+      Widget iconWidget = Icon(
+        icon,
+        color: active ? AppTheme.secondaryColor : Colors.grey,
+      );
+
+      if (i == 1) {
+        // Cart index
+        iconWidget = Consumer<CartProvider>(
+          builder: (context, cart, child) {
+            final count = cart.items.length;
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(
+                  icon,
+                  color: active ? AppTheme.secondaryColor : Colors.grey,
+                ),
+                if (count > 0)
+                  Positioned(
+                    right: -8,
+                    top: -8,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        '$count',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        );
+      }
+
       return InkWell(
         onTap: () {
           if (onItemSelected != null) onItemSelected!(i);
         },
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: active ? AppTheme.secondaryColor : Colors.grey),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: active ? AppTheme.secondaryColor : Colors.grey,
-                fontSize: 11,
-                fontWeight: active ? FontWeight.w600 : FontWeight.normal,
+        borderRadius: BorderRadius.circular(16),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+          decoration: BoxDecoration(
+            color:
+                active
+                    ? AppTheme.secondaryColor.withOpacity(0.15)
+                    : Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              iconWidget,
+              const SizedBox(height: 2),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: active ? AppTheme.secondaryColor : Colors.grey,
+                  fontSize: 11,
+                  fontWeight: active ? FontWeight.w600 : FontWeight.normal,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     }
@@ -55,75 +119,38 @@ class AppBottomNavBar extends StatelessWidget implements PreferredSizeWidget {
       notchMargin: 8,
       child: SizedBox(
         height: _height,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final width = constraints.maxWidth;
-            final itemWidth = (width - 56) / 4; // 56 is FAB width gap
-
-            double getIndicatorLeft(int index) {
-              if (index < 2) {
-                return index * itemWidth;
-              } else {
-                return index * itemWidth + 56;
-              }
-            }
-
-            return Stack(
-              children: [
-                // Sliding Indicator (Pill Shape)
-                AnimatedPositioned(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  left:
-                      getIndicatorLeft(activeIndex) +
-                      (itemWidth - 64) / 2, // Center horizontally
-                  top: 16, // Align with the icon
-                  width: 64,
-                  height: 32,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: AppTheme.secondaryColor.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                ),
-                // Items
-                Row(
-                  children: [
-                    Expanded(
-                      child: buildItem(
-                        0,
-                        items[0]['icon'] as IconData,
-                        items[0]['label'] as String,
-                      ),
-                    ),
-                    Expanded(
-                      child: buildItem(
-                        1,
-                        items[1]['icon'] as IconData,
-                        items[1]['label'] as String,
-                      ),
-                    ),
-                    const SizedBox(width: 56),
-                    Expanded(
-                      child: buildItem(
-                        2,
-                        items[2]['icon'] as IconData,
-                        items[2]['label'] as String,
-                      ),
-                    ),
-                    Expanded(
-                      child: buildItem(
-                        3,
-                        items[3]['icon'] as IconData,
-                        items[3]['label'] as String,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          },
+        child: Row(
+          children: [
+            Expanded(
+              child: buildItem(
+                0,
+                items[0]['icon'] as IconData,
+                items[0]['label'] as String,
+              ),
+            ),
+            Expanded(
+              child: buildItem(
+                1,
+                items[1]['icon'] as IconData,
+                items[1]['label'] as String,
+              ),
+            ),
+            const SizedBox(width: 56),
+            Expanded(
+              child: buildItem(
+                2,
+                items[2]['icon'] as IconData,
+                items[2]['label'] as String,
+              ),
+            ),
+            Expanded(
+              child: buildItem(
+                3,
+                items[3]['icon'] as IconData,
+                items[3]['label'] as String,
+              ),
+            ),
+          ],
         ),
       ),
     );
