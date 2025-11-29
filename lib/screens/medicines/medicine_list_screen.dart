@@ -11,6 +11,7 @@ import '../../widgets/network_image_cert.dart';
 import 'medicine_detail_screen.dart';
 import '../main_screen.dart';
 import '../../utils/snackbar_helper.dart';
+import '../../services/danh_gia_service.dart';
 
 class MedicineListScreen extends StatefulWidget {
   final String? maLoaiThuoc;
@@ -253,11 +254,14 @@ class _MedicineCard extends StatefulWidget {
 
 class _MedicineCardState extends State<_MedicineCard> {
   int _selected = 0;
+  double _avgRating = 0;
+  int _reviewCount = 0;
 
   @override
   void initState() {
     super.initState();
     _initSelected();
+    _fetchRating();
   }
 
   @override
@@ -265,12 +269,40 @@ class _MedicineCardState extends State<_MedicineCard> {
     super.didUpdateWidget(oldWidget);
     if (widget.medicine != oldWidget.medicine) {
       _initSelected();
+      _fetchRating();
     }
   }
 
   void _initSelected() {
     _selected = widget.medicine.giaThuocs.indexWhere((o) => o.soLuongCon > 0);
     if (_selected < 0) _selected = 0;
+  }
+
+  Future<void> _fetchRating() async {
+    try {
+      final service = DanhGiaService();
+      final reviews = await service.getReviewsByMedicine(
+        widget.medicine.maThuoc,
+      );
+      if (reviews.isNotEmpty) {
+        final total = reviews.fold(0, (sum, item) => sum + item.soSao);
+        if (mounted) {
+          setState(() {
+            _avgRating = total / reviews.length;
+            _reviewCount = reviews.length;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _avgRating = 0;
+            _reviewCount = 0;
+          });
+        }
+      }
+    } catch (_) {
+      // Ignore errors, just don't show rating
+    }
   }
 
   Widget buildMedicineImage(String? url) {
@@ -350,6 +382,33 @@ class _MedicineCardState extends State<_MedicineCard> {
                       fontSize: 14,
                     ),
                   ),
+                  if (_avgRating > 0) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.star_rounded,
+                          color: Colors.amber,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 2),
+                        Text(
+                          _avgRating.toStringAsFixed(1),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          ' ($_reviewCount)',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 4),
                   Text(
                     widget.medicine.tenNCC ?? '',

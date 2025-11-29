@@ -5,14 +5,15 @@ import 'package:quan_ly_nha_thuoc/models/categoryGroup/CategoryType.dart';
 
 class CategoryGroupService {
   final ApiService _api = ApiService();
+
   /// Lấy danh sách nhóm loại từ endpoint NhomLoai
   /// Trả về danh sách các CategoryGroup
   Future<List<CategoryGroup>> getAllCategoryGroups() async {
     try {
       // NOTE: ApiService.baseUrl already contains the "/api" prefix.
       // Do NOT start the path with a leading '/' so Dio will append it correctly.
-  // Ensure leading slash so baseUrl ('.../api') combines correctly to '/api/NhomLoai'
-  final Response response = await _api.get('/NhomLoai');
+      // Ensure leading slash so baseUrl ('.../api') combines correctly to '/api/NhomLoai'
+      final Response response = await _api.get('/NhomLoai/WithLoai');
 
       // Server trả về object: { status: 1, message: ..., data: [...] }
       if (response.statusCode == 200) {
@@ -57,16 +58,22 @@ class CategoryGroupService {
         if (body is Map<String, dynamic>) {
           final data = body['data'];
           if (data is List) {
-            return data.map((e) => CategoryType.fromJson(e as Map<String, dynamic>)).toList();
+            return data
+                .map((e) => CategoryType.fromJson(e as Map<String, dynamic>))
+                .toList();
           }
           return <CategoryType>[];
         }
 
         if (body is List) {
-          return body.map((e) => CategoryType.fromJson(e as Map<String, dynamic>)).toList();
+          return body
+              .map((e) => CategoryType.fromJson(e as Map<String, dynamic>))
+              .toList();
         }
 
-        throw Exception('Unexpected response format from /NhomLoai/Loai/$maNhomLoai');
+        throw Exception(
+          'Unexpected response format from /NhomLoai/Loai/$maNhomLoai',
+        );
       }
 
       throw Exception('Failed to load category types: ${response.statusCode}');

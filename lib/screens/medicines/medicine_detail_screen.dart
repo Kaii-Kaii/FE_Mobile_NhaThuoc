@@ -9,6 +9,7 @@ import '../../models/medicine_price_option.dart';
 import '../../providers/cart_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/snackbar_helper.dart';
+import 'medicine_reviews_section.dart';
 
 class MedicineDetailScreen extends StatefulWidget {
   final String maThuoc;
@@ -128,6 +129,8 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
                         _buildHeroHeader(d, selected, stock),
                         const SizedBox(height: 24),
                         _buildDetailBody(d),
+                        const SizedBox(height: 24),
+                        MedicineReviewsSection(maThuoc: d.maThuoc),
                       ],
                     ),
                   ),

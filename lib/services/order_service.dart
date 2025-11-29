@@ -96,6 +96,7 @@ class OrderService {
         '/HoaDon/UpdateStatus',
         data: {'maHD': maHD, 'trangThaiGiaoHang': -1},
       );
+      await sendInvoiceEmail(maHD);
     } catch (e) {
       throw Exception(ApiService.handleError(e));
     }
