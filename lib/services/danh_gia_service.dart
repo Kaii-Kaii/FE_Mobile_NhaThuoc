@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../models/danh_gia_thuoc_model.dart';
+import '../models/review_eligibility_model.dart';
 import 'api_service.dart';
 
 class DanhGiaService {
@@ -131,6 +132,24 @@ class DanhGiaService {
       return false;
     } catch (e) {
       return false;
+    }
+  }
+
+  /// 7. Kiểm tra quyền đánh giá
+  Future<List<ReviewEligibilityModel>> checkEligibility(String maKH) async {
+    try {
+      final response = await _apiService.get('$_baseUrl/eligible/$maKH');
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data;
+        if (data['data'] is List) {
+          return (data['data'] as List)
+              .map((e) => ReviewEligibilityModel.fromJson(e))
+              .toList();
+        }
+      }
+      return [];
+    } catch (e) {
+      return [];
     }
   }
 }

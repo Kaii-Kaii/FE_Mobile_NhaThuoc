@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:quan_ly_nha_thuoc/models/danh_gia_thuoc_model.dart';
+import 'package:quan_ly_nha_thuoc/models/review_eligibility_model.dart';
 import 'package:quan_ly_nha_thuoc/providers/customer_provider.dart';
 import 'package:quan_ly_nha_thuoc/services/danh_gia_service.dart';
 import 'package:quan_ly_nha_thuoc/theme/app_theme.dart';
@@ -21,6 +22,7 @@ class _MedicineReviewsSectionState extends State<MedicineReviewsSection> {
   List<DanhGiaThuocModel> _reviews = [];
   bool _loading = true;
   DanhGiaThuocModel? _userReview;
+  bool _canReview = false;
 
   @override
   void initState() {
@@ -31,10 +33,23 @@ class _MedicineReviewsSectionState extends State<MedicineReviewsSection> {
   Future<void> _loadReviews() async {
     try {
       setState(() => _loading = true);
-      final reviews = await _service.getReviewsByMedicine(widget.maThuoc);
+
+      // Run both requests in parallel
+      final reviewsFuture = _service.getReviewsByMedicine(widget.maThuoc);
 
       final customerProvider = context.read<CustomerProvider>();
       final currentMaKH = customerProvider.customer?.maKH;
+
+      Future<List<ReviewEligibilityModel>>? eligibilityFuture;
+      if (currentMaKH != null) {
+        eligibilityFuture = _service.checkEligibility(currentMaKH);
+      }
+
+      final reviews = await reviewsFuture;
+      final eligibilityList =
+          eligibilityFuture != null
+              ? await eligibilityFuture
+              : <ReviewEligibilityModel>[];
 
       DanhGiaThuocModel? myReview;
       if (currentMaKH != null) {
@@ -43,10 +58,24 @@ class _MedicineReviewsSectionState extends State<MedicineReviewsSection> {
         } catch (_) {}
       }
 
+      // Check eligibility
+      bool canReview = false;
+      if (currentMaKH != null) {
+        // Check if current medicine is in the eligible list
+        final eligibleItem =
+            eligibilityList
+                .where((e) => e.maThuoc == widget.maThuoc)
+                .firstOrNull;
+        if (eligibleItem != null) {
+          canReview = true;
+        }
+      }
+
       if (mounted) {
         setState(() {
           _reviews = reviews;
           _userReview = myReview;
+          _canReview = canReview;
           _loading = false;
         });
       }
@@ -184,10 +213,15 @@ class _MedicineReviewsSectionState extends State<MedicineReviewsSection> {
           ],
         ),
         TextButton.icon(
-          onPressed: _showReviewDialog,
+          onPressed:
+              (_canReview || _userReview != null) ? _showReviewDialog : null,
           style: TextButton.styleFrom(
             foregroundColor: AppTheme.primaryColor,
-            backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
+            backgroundColor:
+                (_canReview || _userReview != null)
+                    ? AppTheme.primaryColor.withOpacity(0.1)
+                    : Colors.grey[200],
+            disabledForegroundColor: Colors.grey[400],
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),

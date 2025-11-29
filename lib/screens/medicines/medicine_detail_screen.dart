@@ -10,6 +10,7 @@ import '../../providers/cart_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/snackbar_helper.dart';
 import 'medicine_reviews_section.dart';
+import 'medicine_comments_section.dart';
 
 class MedicineDetailScreen extends StatefulWidget {
   final String maThuoc;
@@ -33,6 +34,7 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
   String? _error;
 
   int _selectedIndex = 0;
+  int _feedbackTabIndex = 0;
   int _qty = 1;
 
   @override
@@ -130,7 +132,7 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
                         const SizedBox(height: 24),
                         _buildDetailBody(d),
                         const SizedBox(height: 24),
-                        MedicineReviewsSection(maThuoc: d.maThuoc),
+                        _buildFeedbackSection(d.maThuoc),
                       ],
                     ),
                   ),
@@ -613,6 +615,79 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
 
   String _formatCurrency(num value) {
     return '${_currencyFormatter.format(value).trim()} đ';
+  }
+
+  // -------- FEEDBACK TABS --------
+  Widget _buildFeedbackSection(String maThuoc) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              _buildTabItem(0, 'Đánh giá'),
+              _buildTabItem(1, 'Hỏi đáp'),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child:
+              _feedbackTabIndex == 0
+                  ? MedicineReviewsSection(
+                    key: const ValueKey('reviews'),
+                    maThuoc: maThuoc,
+                  )
+                  : MedicineCommentsSection(
+                    key: const ValueKey('comments'),
+                    maThuoc: maThuoc,
+                  ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTabItem(int index, String title) {
+    final isSelected = _feedbackTabIndex == index;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _feedbackTabIndex = index),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow:
+                isSelected
+                    ? [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                    : null,
+          ),
+          child: Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color:
+                  isSelected
+                      ? AppTheme.primaryColor
+                      : AppTheme.textSecondaryColor,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
