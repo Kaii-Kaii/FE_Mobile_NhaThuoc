@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quan_ly_nha_thuoc/theme/app_theme.dart';
-import 'package:quan_ly_nha_thuoc/utils/snackbar_helper.dart';
+import 'package:quan_ly_nha_thuoc/screens/chat/chat_screen.dart';
 
 class CenterFloatingButton extends StatelessWidget {
   const CenterFloatingButton({super.key});
@@ -31,10 +31,9 @@ class CenterFloatingButton extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            SnackBarHelper.show(
+            Navigator.push(
               context,
-              'Chat sẽ được cập nhật sớm.',
-              type: SnackBarType.info,
+              MaterialPageRoute(builder: (context) => const ChatScreen()),
             );
           },
           customBorder: const CircleBorder(),
