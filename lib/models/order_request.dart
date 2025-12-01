@@ -26,12 +26,16 @@ class OnlineOrderRequest {
   final int totalAmount;
   final String? note;
   final List<OnlineOrderItem> items;
+  final int phuongThucTT;
+  final String? orderCode;
 
   OnlineOrderRequest({
     required this.customerId,
     required this.totalAmount,
     required this.items,
     this.note,
+    required this.phuongThucTT,
+    this.orderCode,
   });
 
   Map<String, dynamic> toJson() {
@@ -39,6 +43,8 @@ class OnlineOrderRequest {
       'maKH': customerId,
       'ghiChu': note ?? '',
       'tongTien': totalAmount,
+      'phuongThucTT': phuongThucTT,
+      'orderCode': orderCode,
       'items': items.map((e) => e.toJson()).toList(),
     };
   }
