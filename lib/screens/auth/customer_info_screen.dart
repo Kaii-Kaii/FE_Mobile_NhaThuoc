@@ -24,6 +24,7 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
   final _fullNameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
+  final _dateController = TextEditingController();
 
   DateTime? _selectedDate;
   String _selectedGender = 'Nam';
@@ -58,6 +59,7 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
     _fullNameController.dispose();
     _phoneController.dispose();
     _addressController.dispose();
+    _dateController.dispose();
     super.dispose();
   }
 
@@ -73,7 +75,6 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
       initialDate: _selectedDate ?? initialDate,
       firstDate: firstDate,
       lastDate: lastDate,
-      locale: const Locale('vi', 'VN'),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -92,6 +93,7 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
     if (picked != null) {
       setState(() {
         _selectedDate = picked;
+        _dateController.text = DateFormat('dd/MM/yyyy').format(picked);
       });
     }
   }
@@ -293,14 +295,7 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
 
                                 // Date of birth
                                 CustomTextField(
-                                  controller: TextEditingController(
-                                    text:
-                                        _selectedDate != null
-                                            ? DateFormat(
-                                              'dd/MM/yyyy',
-                                            ).format(_selectedDate!)
-                                            : '',
-                                  ),
+                                  controller: _dateController,
                                   labelText: 'Ngày sinh',
                                   hintText: 'Chọn ngày sinh',
                                   prefixIcon: Icons.calendar_today_outlined,

@@ -97,27 +97,46 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (success) {
-      // Clear any cached customer data to avoid stale info between accounts
-      await customerProvider.clearCustomer();
+      // Show success message
+      SnackBarHelper.show(
+        context,
+        AppConstants.loginSuccess,
+        type: SnackBarType.success,
+      );
 
-      bool hasCustomerInfo = false;
       final loggedInUser = authProvider.user;
+      bool hasCustomerInfo = false;
 
-      if (loggedInUser?.maKhachHang != null) {
-        final fetched = await customerProvider.getCustomer(
-          loggedInUser!.maKhachHang!,
-        );
+      // Kiểm tra xem user có mã khách hàng không
+      if (loggedInUser?.maKhachHang != null &&
+          loggedInUser!.maKhachHang!.isNotEmpty) {
+        try {
+          // Clear cached customer data
+          await customerProvider.clearCustomer();
 
-        if (!fetched && customerProvider.errorMessage != null) {
-          SnackBarHelper.show(
-            context,
-            customerProvider.errorMessage!,
-            type: SnackBarType.error,
+          // Fetch customer info
+          final fetched = await customerProvider.getCustomer(
+            loggedInUser.maKhachHang!,
           );
-        }
 
-        hasCustomerInfo = fetched && customerProvider.customer != null;
+          // Kiểm tra xem có thông tin khách hàng đầy đủ không
+          if (fetched && customerProvider.customer != null) {
+            final customer = customerProvider.customer!;
+            // Kiểm tra các trường thông tin bắt buộc
+            hasCustomerInfo =
+                customer.hoTen != null &&
+                customer.hoTen!.isNotEmpty &&
+                customer.dienThoai != null &&
+                customer.dienThoai!.isNotEmpty;
+          }
+        } catch (e) {
+          // Nếu có lỗi khi fetch, coi như chưa có thông tin
+          print('Error fetching customer info: $e');
+          hasCustomerInfo = false;
+        }
       }
+
+      if (!mounted) return;
 
       final redirectRoute =
           (_redirectRoute == AppConstants.customerInfoRoute ||
@@ -125,13 +144,16 @@ class _LoginScreenState extends State<LoginScreen> {
               ? AppConstants.homeRoute
               : _redirectRoute!;
 
+      // Điều hướng dựa trên việc có thông tin khách hàng hay không
       if (hasCustomerInfo) {
+        // Đã có đầy đủ thông tin -> chuyển đến trang chính
         if (_popOnSuccess) {
           Navigator.of(context).pop();
         } else {
           Navigator.of(context).pushReplacementNamed(redirectRoute);
         }
       } else {
+        // Chưa có thông tin -> chuyển đến trang nhập thông tin khách hàng
         Navigator.of(context).pushReplacementNamed(
           AppConstants.customerInfoRoute,
           arguments: {
