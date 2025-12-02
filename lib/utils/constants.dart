@@ -15,19 +15,21 @@ class AppConstants {
   // API của bạn chạy với HTTPS và có prefix /api
 
   // ✅ DÙNG HTTPS (API của bạn đang dùng HTTPS)
+  // Cho Android Emulator, dùng 10.0.2.2 để trỏ đến localhost của máy host
   static const String baseUrl = 'https://10.0.2.2:7283/api';
 
-  // Nếu HTTPS không work, thử HTTP:
-  // static const String baseUrl = 'http://10.0.2.2:7283/api';
-
-  // Hoặc dùng IP thực của máy tính (tìm bằng ipconfig):
+  // Nếu test trên thiết bị thật hoặc iOS simulator, dùng IP thực:
   // static const String baseUrl = 'https://192.168.1.XXX:7283/api';
 
+  // Nếu test trên web browser:
+  // static const String baseUrl = 'https://localhost:7283/api';
+
   // ⚠️ QUAN TRỌNG: Không có dấu / ở đầu để Dio combine đúng với baseUrl
-  // ⚠️ Cả Login và Register đều dùng endpoint /TaiKhoan/Login
   static const String loginEndpoint = '/TaiKhoan/Login';
-  static const String registerEndpoint =
-      '/TaiKhoan/ConfirmEmail'; // ✅ Dùng chung với Login
+  // Endpoint đăng ký - POST /api/TaiKhoan
+  static const String registerEndpoint = '/TaiKhoan';
+  // CheckUsername sử dụng query parameter: ?username=xxx
+  static const String checkUsernameEndpoint = '/TaiKhoan/CheckUsername';
   static const String customerEndpoint = '/KhachHang';
 
   // Local Storage Keys
