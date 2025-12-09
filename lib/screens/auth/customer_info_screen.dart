@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:quan_ly_nha_thuoc/models/customer_model.dart';
 import 'package:quan_ly_nha_thuoc/providers/auth_provider.dart';
 import 'package:quan_ly_nha_thuoc/providers/customer_provider.dart';
 import 'package:quan_ly_nha_thuoc/theme/app_theme.dart';
@@ -31,6 +32,7 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
   String? _redirectRoute;
   bool _popOnSuccess = false;
   bool _didLoadArgs = false;
+  bool _isEditMode = false;
 
   @override
   void didChangeDependencies() {
@@ -43,15 +45,38 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
       if (redirect is String && redirect.isNotEmpty) {
         _redirectRoute = redirect;
       }
+      _popOnSuccess = args['popOnSuccess'] ?? false;
+      _isEditMode = args['isEditMode'] ?? false;
     } else if (args is String && args.isNotEmpty) {
       _redirectRoute = args;
     }
 
-    if (args is Map<String, dynamic>) {
-      _popOnSuccess = args['popOnSuccess'] ?? false;
+    // Load dữ liệu khách hàng hiện tại nếu ở chế độ edit
+    if (_isEditMode) {
+      _loadCustomerData();
     }
 
     _didLoadArgs = true;
+  }
+
+  /// Load dữ liệu khách hàng hiện tại để chỉnh sửa
+  void _loadCustomerData() {
+    final customerProvider = context.read<CustomerProvider>();
+    final customer = customerProvider.customer;
+
+    if (customer != null) {
+      _fullNameController.text = customer.hoTen;
+      _phoneController.text = customer.dienThoai;
+      _addressController.text = customer.diaChi ?? '';
+      _selectedGender = customer.gioiTinh ?? 'Nam';
+
+      if (customer.ngaySinh != null) {
+        _selectedDate = customer.ngaySinh;
+        _dateController.text = DateFormat(
+          'dd/MM/yyyy',
+        ).format(customer.ngaySinh!);
+      }
+    }
   }
 
   @override
@@ -120,20 +145,76 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
       listen: false,
     );
 
-    // Call API
-    final success = await customerProvider.createCustomer(
-      hoTen: _fullNameController.text.trim(),
-      ngaySinh: _selectedDate!,
-      dienThoai: _phoneController.text.trim(),
-      gioiTinh: _selectedGender,
-      diaChi: _addressController.text.trim(),
-    );
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    bool success;
+
+    // Lấy MaKH từ user để cập nhật đúng customer record
+    final maKH = authProvider.user?.maKhachHang;
+
+    if (maKH == null || maKH.isEmpty) {
+      SnackBarHelper.show(
+        context,
+        'Không tìm thấy mã khách hàng. Vui lòng đăng nhập lại.',
+        type: SnackBarType.error,
+      );
+      return;
+    }
+
+    if (_isEditMode) {
+      // Cập nhật thông tin khách hàng (đang chỉnh sửa)
+      final customer = customerProvider.customer;
+      if (customer == null) {
+        SnackBarHelper.show(
+          context,
+          'Không tìm thấy thông tin khách hàng',
+          type: SnackBarType.error,
+        );
+        return;
+      }
+
+      final updatedCustomer = customer.copyWith(
+        hoTen: _fullNameController.text.trim(),
+        ngaySinh: _selectedDate,
+        dienThoai: _phoneController.text.trim(),
+        gioiTinh: _selectedGender,
+        diaChi: _addressController.text.trim(),
+      );
+
+      success = await customerProvider.updateCustomer(updatedCustomer);
+    } else {
+      // Lần đầu nhập thông tin - CŨNG dùng UPDATE vì backend đã tạo sẵn record
+      // Tạo CustomerModel với MaKH từ user
+      final newCustomer = CustomerModel(
+        maKH: maKH,
+        hoTen: _fullNameController.text.trim(),
+        ngaySinh: _selectedDate,
+        dienThoai: _phoneController.text.trim(),
+        gioiTinh: _selectedGender,
+        diaChi: _addressController.text.trim(),
+      );
+
+      success = await customerProvider.updateCustomer(newCustomer);
+    }
 
     if (!mounted) return;
 
     if (success) {
-      // Show success modal
-      await _showSuccessDialog();
+      // Cập nhật hasCustomerInfo trong AuthProvider
+      await context.read<AuthProvider>().updateHasCustomerInfo(true);
+
+      if (_isEditMode) {
+        // Nếu là chế độ chỉnh sửa, hiển thị thông báo và quay lại
+        SnackBarHelper.show(
+          context,
+          AppConstants.customerInfoSuccess,
+          type: SnackBarType.success,
+        );
+        Navigator.of(context).pop();
+      } else {
+        // Nếu là tạo mới, hiển thị dialog thành công
+        await _showSuccessDialog();
+      }
     } else {
       // Show error message
       if (customerProvider.errorMessage != null) {
@@ -250,7 +331,9 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
                           child: Column(
                             children: [
                               Text(
-                                'Xin chào, $username!',
+                                _isEditMode
+                                    ? 'Cập nhật thông tin'
+                                    : 'Xin chào, $username!',
                                 style: const TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
@@ -258,10 +341,12 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              const Text(
-                                'Vui lòng hoàn tất thông tin của bạn',
+                              Text(
+                                _isEditMode
+                                    ? 'Chỉnh sửa thông tin cá nhân của bạn'
+                                    : 'Vui lòng hoàn tất thông tin của bạn',
                                 textAlign: TextAlign.center,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 14,
                                   color: AppTheme.textSecondaryColor,
                                 ),
@@ -389,7 +474,8 @@ class _CustomerInfoScreenState extends State<CustomerInfoScreen> {
                                 Consumer<CustomerProvider>(
                                   builder: (context, customerProvider, child) {
                                     return CustomButton(
-                                      text: 'Hoàn tất',
+                                      text:
+                                          _isEditMode ? 'Cập nhật' : 'Hoàn tất',
                                       onPressed: _handleSubmit,
                                       isLoading: customerProvider.isLoading,
                                     );

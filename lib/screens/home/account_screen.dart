@@ -367,9 +367,10 @@ class _AccountScreenState extends State<AccountScreen> {
                 text: 'Cập nhật thông tin',
                 icon: Icons.edit,
                 onPressed: () {
-                  Navigator.of(
-                    context,
-                  ).pushNamed(AppConstants.customerInfoRoute);
+                  Navigator.of(context).pushNamed(
+                    AppConstants.customerInfoRoute,
+                    arguments: {'isEditMode': true},
+                  );
                 },
               ),
             ],
