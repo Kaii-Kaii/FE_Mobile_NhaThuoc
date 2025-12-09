@@ -45,12 +45,16 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {
         _isLoading = false;
       });
-      SnackBarHelper.show(
-        context,
-        'Vui lòng đăng nhập để sử dụng tính năng chat.',
-        type: SnackBarType.error,
-      );
-      Navigator.pop(context);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          SnackBarHelper.show(
+            context,
+            'Vui lòng đăng nhập để sử dụng tính năng chat.',
+            type: SnackBarType.error,
+          );
+          Navigator.pop(context);
+        }
+      });
       return;
     }
 
@@ -74,11 +78,15 @@ class _ChatScreenState extends State<ChatScreen> {
       debugPrint('Error initializing chat: $e');
       if (mounted) {
         final errorMessage = e.toString().replaceAll('Exception: ', '');
-        SnackBarHelper.show(
-          context,
-          'Lỗi: $errorMessage',
-          type: SnackBarType.error,
-        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            SnackBarHelper.show(
+              context,
+              'Lỗi: $errorMessage',
+              type: SnackBarType.error,
+            );
+          }
+        });
       }
     } finally {
       if (mounted) {
