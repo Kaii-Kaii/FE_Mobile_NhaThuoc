@@ -74,6 +74,7 @@ class CustomerService {
       await _apiService.put(
         '${AppConstants.customerEndpoint}/${customer.maKH}',
         data: {
+          'makh': customer.maKH,
           'HoTen': customer.hoTen,
           'NgaySinh': customer.ngaySinh?.toIso8601String(),
           'DienThoai': customer.dienThoai,

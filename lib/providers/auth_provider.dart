@@ -143,4 +143,13 @@ class AuthProvider with ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
   }
+
+  /// Cập nhật hasCustomerInfo sau khi tạo/cập nhật thông tin khách hàng
+  Future<void> updateHasCustomerInfo(bool hasInfo) async {
+    if (_user != null) {
+      _user = _user!.copyWith(hasCustomerInfo: hasInfo);
+      await StorageHelper.setObject(AppConstants.userKey, _user!.toJson());
+      notifyListeners();
+    }
+  }
 }

@@ -105,36 +105,6 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       final loggedInUser = authProvider.user;
-      bool hasCustomerInfo = false;
-
-      // Kiểm tra xem user có mã khách hàng không
-      if (loggedInUser?.maKhachHang != null &&
-          loggedInUser!.maKhachHang!.isNotEmpty) {
-        try {
-          // Clear cached customer data
-          await customerProvider.clearCustomer();
-
-          // Fetch customer info
-          final fetched = await customerProvider.getCustomer(
-            loggedInUser.maKhachHang!,
-          );
-
-          // Kiểm tra xem có thông tin khách hàng đầy đủ không
-          if (fetched && customerProvider.customer != null) {
-            final customer = customerProvider.customer!;
-            // Kiểm tra các trường thông tin bắt buộc
-            hasCustomerInfo =
-                customer.hoTen != null &&
-                customer.hoTen!.isNotEmpty &&
-                customer.dienThoai != null &&
-                customer.dienThoai!.isNotEmpty;
-          }
-        } catch (e) {
-          // Nếu có lỗi khi fetch, coi như chưa có thông tin
-          print('Error fetching customer info: $e');
-          hasCustomerInfo = false;
-        }
-      }
 
       if (!mounted) return;
 
@@ -144,9 +114,18 @@ class _LoginScreenState extends State<LoginScreen> {
               ? AppConstants.homeRoute
               : _redirectRoute!;
 
-      // Điều hướng dựa trên việc có thông tin khách hàng hay không
-      if (hasCustomerInfo) {
-        // Đã có đầy đủ thông tin -> chuyển đến trang chính
+      // Sử dụng hasCustomerInfo từ user (backend đã trả về)
+      if (loggedInUser?.hasCustomerInfo == true) {
+        // Đã có đầy đủ thông tin -> tải thông tin khách hàng và chuyển đến trang chính
+        if (loggedInUser?.maKhachHang != null) {
+          // Load customer info vào provider để sử dụng trong app
+          await context.read<CustomerProvider>().getCustomer(
+            loggedInUser!.maKhachHang!,
+          );
+        }
+
+        if (!mounted) return;
+
         if (_popOnSuccess) {
           Navigator.of(context).pop();
         } else {

@@ -5,12 +5,14 @@ class UserModel {
   final String tenDangNhap;
   final String email;
   final String? maKhachHang;
+  final bool hasCustomerInfo;
 
   UserModel({
     required this.maTK,
     required this.tenDangNhap,
     required this.email,
     this.maKhachHang,
+    this.hasCustomerInfo = false,
   });
 
   /// Convert từ JSON sang UserModel
@@ -74,11 +76,28 @@ class UserModel {
       return null;
     }
 
+    bool parseHasCustomerInfo() {
+      final possibleKeys = ['hasCustomerInfo', 'HasCustomerInfo'];
+      for (final key in possibleKeys) {
+        if (json.containsKey(key) && json[key] != null) {
+          final value = json[key];
+          if (value is bool) return value;
+          if (value is String) {
+            final lower = value.toLowerCase();
+            return lower == 'true' || lower == '1';
+          }
+          if (value is int) return value == 1;
+        }
+      }
+      return false;
+    }
+
     return UserModel(
       maTK: parseAccountId(),
       tenDangNhap: parseUsername(),
       email: parseEmail(),
       maKhachHang: parseCustomerId(),
+      hasCustomerInfo: parseHasCustomerInfo(),
     );
   }
 
@@ -89,6 +108,7 @@ class UserModel {
       'tenDangNhap': tenDangNhap,
       'email': email,
       if (maKhachHang != null) 'maKhachHang': maKhachHang,
+      'hasCustomerInfo': hasCustomerInfo,
     };
   }
 
@@ -98,18 +118,20 @@ class UserModel {
     String? tenDangNhap,
     String? email,
     String? maKhachHang,
+    bool? hasCustomerInfo,
   }) {
     return UserModel(
       maTK: maTK ?? this.maTK,
       tenDangNhap: tenDangNhap ?? this.tenDangNhap,
       email: email ?? this.email,
       maKhachHang: maKhachHang ?? this.maKhachHang,
+      hasCustomerInfo: hasCustomerInfo ?? this.hasCustomerInfo,
     );
   }
 
   @override
   String toString() {
-    return 'UserModel(maTK: $maTK, tenDangNhap: $tenDangNhap, email: $email, maKhachHang: $maKhachHang)';
+    return 'UserModel(maTK: $maTK, tenDangNhap: $tenDangNhap, email: $email, maKhachHang: $maKhachHang, hasCustomerInfo: $hasCustomerInfo)';
   }
 
   @override
@@ -120,7 +142,8 @@ class UserModel {
         other.maTK == maTK &&
         other.tenDangNhap == tenDangNhap &&
         other.email == email &&
-        other.maKhachHang == maKhachHang;
+        other.maKhachHang == maKhachHang &&
+        other.hasCustomerInfo == hasCustomerInfo;
   }
 
   @override
@@ -128,6 +151,7 @@ class UserModel {
     return maTK.hashCode ^
         tenDangNhap.hashCode ^
         email.hashCode ^
-        maKhachHang.hashCode;
+        maKhachHang.hashCode ^
+        hasCustomerInfo.hashCode;
   }
 }

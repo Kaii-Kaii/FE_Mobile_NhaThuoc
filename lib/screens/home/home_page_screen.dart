@@ -28,22 +28,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
   List<MedicineByType> _featuredMedicines = [];
   bool _loading = true;
   String? _error;
-  int _currentBannerIndex = 0;
-
-  final List<Map<String, dynamic>> _promotionBanners = [
-    {
-      'image': 'https://i.ibb.co/zQwDG3g/pharmacy-banner1.jpg',
-      'title': 'Khuyến mãi đặc biệt',
-    },
-    {
-      'image': 'https://i.ibb.co/yh4GmP0/pharmacy-banner2.jpg',
-      'title': 'Sản phẩm mới',
-    },
-    {
-      'image': 'https://i.ibb.co/DQrwzjD/pharmacy-banner3.jpg',
-      'title': 'Thương hiệu tin dùng',
-    },
-  ];
 
   @override
   void initState() {
@@ -91,7 +75,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
                     padding: const EdgeInsets.only(bottom: 20),
                     children: [
                       _buildHeader(),
-                      _buildPromotionBanner(),
                       _buildDynamicCategories(),
                       _buildDynamicProducts(),
                     ],
@@ -321,133 +304,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildPromotionBanner() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-          child: Row(
-            children: [
-              Container(
-                width: 4,
-                height: 20,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      AppTheme.secondaryColor,
-                      AppTheme.secondaryColor.withOpacity(0.8),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(width: 10),
-              const Text(
-                'Khuyến mãi',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF333333),
-                ),
-              ),
-            ],
-          ),
-        ),
-        AspectRatio(
-          aspectRatio: 16 / 7,
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            child: PageView.builder(
-              itemCount: _promotionBanners.length,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentBannerIndex = index;
-                });
-              },
-              itemBuilder: (context, index) {
-                final banner = _promotionBanners[index];
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.3),
-                        spreadRadius: 2,
-                        blurRadius: 10,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.network(
-                      banner['image'],
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                const Color(0xFF1565C0),
-                                const Color(0xFF0D47A1),
-                              ],
-                            ),
-                          ),
-                          child: Center(
-                            child: Text(
-                              banner['title'],
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(
-            _promotionBanners.length,
-            (index) => Container(
-              width: _currentBannerIndex == index ? 24 : 8,
-              height: 8,
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
-                gradient:
-                    _currentBannerIndex == index
-                        ? LinearGradient(
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                          colors: [
-                            AppTheme.secondaryColor,
-                            AppTheme.secondaryColor.withOpacity(0.8),
-                          ],
-                        )
-                        : null,
-                color: _currentBannerIndex == index ? null : Colors.grey[300],
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 
