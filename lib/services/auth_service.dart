@@ -46,14 +46,51 @@ class AuthService {
     required String password,
   }) async {
     try {
-      await _apiService.post(
-        AppConstants.registerEndpoint,
-        data: {'TenDangNhap': username, 'Email': email, 'MatKhau': password},
-      );
+      // Data gửi lên backend - KHÔNG có MaKH
+      final registerData = {
+        'tenDangNhap': username,
+        'email': email,
+        'matKhau': password,
+      };
+
+      print('📤 Registering with data: $registerData');
+
+      await _apiService.post(AppConstants.registerEndpoint, data: registerData);
 
       return true;
     } catch (e) {
+      print('❌ Register error: $e');
       throw Exception(ApiService.handleError(e));
+    }
+  }
+
+  /// Kiểm tra tên đăng nhập đã tồn tại chưa
+  ///
+  /// [username] - Tên đăng nhập cần kiểm tra
+  ///
+  /// Returns [bool] true nếu đã tồn tại, false nếu chưa
+  /// Throws [Exception] nếu thất bại
+  Future<bool> checkUsernameExists(String username) async {
+    try {
+      // Thử cách 1: Query parameter
+      final response = await _apiService.get(
+        AppConstants.checkUsernameEndpoint,
+        queryParameters: {'username': username},
+      );
+
+      // API trả về { "Exists": true/false }
+      if (response.data is Map<String, dynamic>) {
+        return response.data['Exists'] ?? response.data['exists'] ?? false;
+      } else if (response.data is bool) {
+        return response.data;
+      }
+
+      return false;
+    } catch (e) {
+      // Nếu lỗi 404, có thể endpoint không hỗ trợ
+      // Tạm thời return false để không block UI
+      print('Error checking username: $e');
+      rethrow;
     }
   }
 }
