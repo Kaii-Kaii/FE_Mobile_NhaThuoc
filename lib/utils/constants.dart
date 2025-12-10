@@ -38,6 +38,7 @@ class AppConstants {
   static const String customerKey = 'customer';
   static const String rememberMeKey = 'remember_me';
   static const String cartKey = 'cart_items';
+  static const String tokenKey = 'jwt_token';
 
   // Validation
   static const int minUsernameLength = 6;

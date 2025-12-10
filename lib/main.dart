@@ -9,11 +9,15 @@ import 'package:quan_ly_nha_thuoc/providers/medicine_provider.dart';
 import 'package:quan_ly_nha_thuoc/screens/auth/customer_info_screen.dart';
 import 'package:quan_ly_nha_thuoc/screens/auth/login_screen.dart';
 import 'package:quan_ly_nha_thuoc/screens/auth/register_screen.dart';
+import 'package:quan_ly_nha_thuoc/services/api_service.dart';
 
 import 'package:quan_ly_nha_thuoc/screens/main_screen.dart';
 import 'package:quan_ly_nha_thuoc/theme/app_theme.dart';
 import 'package:quan_ly_nha_thuoc/utils/constants.dart';
 import 'package:quan_ly_nha_thuoc/utils/storage_helper.dart';
+
+/// Global navigator key để điều hướng từ bất kỳ đâu
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 /// Main entry point
 void main() async {
@@ -32,6 +36,15 @@ void main() async {
 
   // Initialize SharedPreferences
   await StorageHelper.init();
+
+  // Thiết lập callback xử lý khi token JWT hết hạn
+  ApiService.onTokenExpired = () {
+    // Điều hướng về màn hình đăng nhập khi token hết hạn
+    navigatorKey.currentState?.pushNamedAndRemoveUntil(
+      AppConstants.loginRoute,
+      (route) => false,
+    );
+  };
 
   // Set preferred orientations
   await SystemChrome.setPreferredOrientations([
@@ -63,6 +76,9 @@ class MyApp extends StatelessWidget {
         title: 'Nhà Thuốc Medion',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
+
+        // Sử dụng navigatorKey để có thể điều hướng từ bất kỳ đâu
+        navigatorKey: navigatorKey,
 
         // Start directly at MainScreen for development/testing
         home: MainScreen(key: MainScreen.globalKey),

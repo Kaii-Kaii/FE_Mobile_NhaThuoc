@@ -6,6 +6,7 @@ class UserModel {
   final String email;
   final String? maKhachHang;
   final bool hasCustomerInfo;
+  final String? token;
 
   UserModel({
     required this.maTK,
@@ -13,6 +14,7 @@ class UserModel {
     required this.email,
     this.maKhachHang,
     this.hasCustomerInfo = false,
+    this.token,
   });
 
   /// Convert từ JSON sang UserModel
@@ -92,12 +94,26 @@ class UserModel {
       return false;
     }
 
+    String? parseToken() {
+      final possibleKeys = ['token', 'Token', 'accessToken', 'AccessToken'];
+      for (final key in possibleKeys) {
+        if (json.containsKey(key) && json[key] != null) {
+          final value = json[key];
+          if (value is String && value.isNotEmpty) {
+            return value;
+          }
+        }
+      }
+      return null;
+    }
+
     return UserModel(
       maTK: parseAccountId(),
       tenDangNhap: parseUsername(),
       email: parseEmail(),
       maKhachHang: parseCustomerId(),
       hasCustomerInfo: parseHasCustomerInfo(),
+      token: parseToken(),
     );
   }
 
@@ -109,6 +125,7 @@ class UserModel {
       'email': email,
       if (maKhachHang != null) 'maKhachHang': maKhachHang,
       'hasCustomerInfo': hasCustomerInfo,
+      if (token != null) 'token': token,
     };
   }
 
@@ -119,6 +136,7 @@ class UserModel {
     String? email,
     String? maKhachHang,
     bool? hasCustomerInfo,
+    String? token,
   }) {
     return UserModel(
       maTK: maTK ?? this.maTK,
@@ -126,12 +144,13 @@ class UserModel {
       email: email ?? this.email,
       maKhachHang: maKhachHang ?? this.maKhachHang,
       hasCustomerInfo: hasCustomerInfo ?? this.hasCustomerInfo,
+      token: token ?? this.token,
     );
   }
 
   @override
   String toString() {
-    return 'UserModel(maTK: $maTK, tenDangNhap: $tenDangNhap, email: $email, maKhachHang: $maKhachHang, hasCustomerInfo: $hasCustomerInfo)';
+    return 'UserModel(maTK: $maTK, tenDangNhap: $tenDangNhap, email: $email, maKhachHang: $maKhachHang, hasCustomerInfo: $hasCustomerInfo, token: ${token != null ? "[HIDDEN]" : "null"})';
   }
 
   @override
@@ -143,7 +162,8 @@ class UserModel {
         other.tenDangNhap == tenDangNhap &&
         other.email == email &&
         other.maKhachHang == maKhachHang &&
-        other.hasCustomerInfo == hasCustomerInfo;
+        other.hasCustomerInfo == hasCustomerInfo &&
+        other.token == token;
   }
 
   @override
@@ -152,6 +172,7 @@ class UserModel {
         tenDangNhap.hashCode ^
         email.hashCode ^
         maKhachHang.hashCode ^
-        hasCustomerInfo.hashCode;
+        hasCustomerInfo.hashCode ^
+        token.hashCode;
   }
 }

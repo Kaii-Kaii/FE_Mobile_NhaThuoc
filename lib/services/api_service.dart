@@ -2,12 +2,19 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:quan_ly_nha_thuoc/utils/constants.dart';
+import 'package:quan_ly_nha_thuoc/utils/storage_helper.dart';
+
+/// Callback để xử lý khi token hết hạn
+typedef OnTokenExpired = void Function();
 
 /// API Service Base
 /// Service cơ bản để xử lý các API calls
 class ApiService {
   static final ApiService _instance = ApiService._internal();
   late Dio _dio;
+
+  /// Callback được gọi khi token hết hạn (401)
+  static OnTokenExpired? onTokenExpired;
 
   factory ApiService() {
     return _instance;
@@ -40,12 +47,19 @@ class ApiService {
       },
     );
 
-    // Add interceptors để log requests và responses
+    // Add interceptors để log requests và responses, thêm token
     _dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (options, handler) {
+        onRequest: (options, handler) async {
+          // Thêm Authorization header nếu có token
+          final token = StorageHelper.getString(AppConstants.tokenKey);
+          if (token != null && token.isNotEmpty) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
+
           print('🚀 REQUEST[${options.method}] => PATH: ${options.path}');
           print('📦 DATA: ${options.data}');
+          print('🔑 HAS TOKEN: ${token != null && token.isNotEmpty}');
           return handler.next(options);
         },
         onResponse: (response, handler) {
@@ -57,10 +71,47 @@ class ApiService {
             '❌ ERROR[${error.response?.statusCode}] => MESSAGE: ${error.message}',
           );
           print('📛 ERROR DATA: ${error.response?.data}');
+
+          // Xử lý 401 Unauthorized - Token hết hạn hoặc không hợp lệ
+          if (error.response?.statusCode == 401) {
+            _handleUnauthorized();
+          }
+
           return handler.next(error);
         },
       ),
     );
+  }
+
+  /// Xử lý khi nhận được lỗi 401
+  void _handleUnauthorized() {
+    // Xóa token đã lưu
+    StorageHelper.remove(AppConstants.tokenKey);
+    StorageHelper.remove(AppConstants.userKey);
+
+    // Gọi callback để app xử lý (redirect về login)
+    if (onTokenExpired != null) {
+      onTokenExpired!();
+    }
+  }
+
+  /// Cập nhật token mới
+  static Future<void> setToken(String? token) async {
+    if (token != null && token.isNotEmpty) {
+      await StorageHelper.setString(AppConstants.tokenKey, token);
+    } else {
+      await StorageHelper.remove(AppConstants.tokenKey);
+    }
+  }
+
+  /// Lấy token hiện tại
+  static String? getToken() {
+    return StorageHelper.getString(AppConstants.tokenKey);
+  }
+
+  /// Xóa token
+  static Future<void> clearToken() async {
+    await StorageHelper.remove(AppConstants.tokenKey);
   }
 
   /// GET request
@@ -171,6 +222,14 @@ class ApiService {
           return 'Kết nối timeout. Vui lòng thử lại.';
 
         case DioExceptionType.badResponse:
+          // Xử lý 401 Unauthorized
+          if (error.response?.statusCode == 401) {
+            return 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+          }
+          // Xử lý 403 Forbidden
+          if (error.response?.statusCode == 403) {
+            return 'Bạn không có quyền truy cập chức năng này.';
+          }
           // Xử lý error response từ server
           if (error.response?.data != null) {
             // Nếu response là string
