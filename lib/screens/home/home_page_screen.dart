@@ -117,28 +117,22 @@ class _HomePageScreenState extends State<HomePageScreen> {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          AppTheme.secondaryColor,
-                          AppTheme.secondaryColor.withOpacity(0.8),
-                        ],
-                      ),
+                      color: Colors.white,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: AppTheme.secondaryColor.withOpacity(0.4),
+                          color: Colors.black.withOpacity(0.1),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
                       ],
                     ),
-                    child: Center(
-                      child: Icon(
-                        Icons.local_pharmacy,
-                        color: Colors.white,
-                        size: 26,
+                    child: ClipOval(
+                      child: Image.asset(
+                        'assets/favicon.png',
+                        width: 44,
+                        height: 44,
+                        fit: BoxFit.cover,
                       ),
                     ),
                   ),
@@ -156,7 +150,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                         ),
                       ),
                       Text(
-                        'AN KHANG',
+                        'Medion',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 16,
