@@ -1,11 +1,13 @@
 import 'package:quan_ly_nha_thuoc/models/user_model.dart';
 import 'package:quan_ly_nha_thuoc/services/api_service.dart';
+import 'package:quan_ly_nha_thuoc/services/google_auth_service.dart';
 import 'package:quan_ly_nha_thuoc/utils/constants.dart';
 
 /// Auth Service
 /// Service xử lý đăng nhập và đăng ký
 class AuthService {
   final ApiService _apiService = ApiService();
+  final GoogleAuthService _googleAuthService = GoogleAuthService();
 
   /// Đăng nhập
   ///
@@ -29,6 +31,49 @@ class AuthService {
       return UserModel.fromJson(userData);
     } catch (e) {
       throw Exception(ApiService.handleError(e));
+    }
+  }
+
+  /// Đăng nhập bằng Google
+  ///
+  /// Returns [UserModel] nếu thành công
+  /// Throws [Exception] nếu thất bại
+  Future<UserModel> loginWithGoogle() async {
+    try {
+      // Step 1: Sign in with Google and get Firebase ID Token
+      final googleData = await _googleAuthService.signInWithGoogle();
+
+      if (googleData == null) {
+        throw Exception('Đăng nhập bị hủy');
+      }
+
+      // Step 2: Send ID Token to backend
+      final response = await _apiService.post(
+        AppConstants.loginWithGoogleEndpoint,
+        data: {
+          'idToken': googleData['idToken'],
+          'email': googleData['email'],
+          'displayName': googleData['displayName'],
+          'photoURL': googleData['photoURL'],
+        },
+      );
+
+      // Parse response thành UserModel
+      final userData = response.data as Map<String, dynamic>;
+      return UserModel.fromJson(userData);
+    } catch (e) {
+      // Sign out from Google if backend fails
+      await _googleAuthService.signOut();
+      throw Exception(ApiService.handleError(e));
+    }
+  }
+
+  /// Đăng xuất khỏi Google
+  Future<void> signOutGoogle() async {
+    try {
+      await _googleAuthService.signOut();
+    } catch (e) {
+      print('Error signing out from Google: $e');
     }
   }
 

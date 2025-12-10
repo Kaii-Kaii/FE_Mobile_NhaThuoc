@@ -97,50 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (success) {
-      // Show success message
-      SnackBarHelper.show(
-        context,
-        AppConstants.loginSuccess,
-        type: SnackBarType.success,
-      );
-
-      final loggedInUser = authProvider.user;
-
-      if (!mounted) return;
-
-      final redirectRoute =
-          (_redirectRoute == AppConstants.customerInfoRoute ||
-                  _redirectRoute == null)
-              ? AppConstants.homeRoute
-              : _redirectRoute!;
-
-      // Sử dụng hasCustomerInfo từ user (backend đã trả về)
-      if (loggedInUser?.hasCustomerInfo == true) {
-        // Đã có đầy đủ thông tin -> tải thông tin khách hàng và chuyển đến trang chính
-        if (loggedInUser?.maKhachHang != null) {
-          // Load customer info vào provider để sử dụng trong app
-          await context.read<CustomerProvider>().getCustomer(
-            loggedInUser!.maKhachHang!,
-          );
-        }
-
-        if (!mounted) return;
-
-        if (_popOnSuccess) {
-          Navigator.of(context).pop();
-        } else {
-          Navigator.of(context).pushReplacementNamed(redirectRoute);
-        }
-      } else {
-        // Chưa có thông tin -> chuyển đến trang nhập thông tin khách hàng
-        Navigator.of(context).pushReplacementNamed(
-          AppConstants.customerInfoRoute,
-          arguments: {
-            "redirectRoute": redirectRoute,
-            "popOnSuccess": _popOnSuccess,
-          },
-        );
-      }
+      _handleLoginSuccess(authProvider.user, customerProvider);
     } else {
       // Show error message
       if (authProvider.errorMessage != null) {
@@ -150,6 +107,83 @@ class _LoginScreenState extends State<LoginScreen> {
           type: SnackBarType.error,
         );
       }
+    }
+  }
+
+  /// Handle Google login
+  Future<void> _handleGoogleLogin() async {
+    // Clear previous error
+    context.read<AuthProvider>().clearError();
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final customerProvider = Provider.of<CustomerProvider>(
+      context,
+      listen: false,
+    );
+
+    // Call Google login API
+    final success = await authProvider.loginWithGoogle();
+
+    if (!mounted) return;
+
+    if (success) {
+      _handleLoginSuccess(authProvider.user, customerProvider);
+    } else {
+      // Show error message
+      if (authProvider.errorMessage != null) {
+        SnackBarHelper.show(
+          context,
+          authProvider.errorMessage!,
+          type: SnackBarType.error,
+        );
+      }
+    }
+  }
+
+  /// Handle successful login (common logic for both login types)
+  void _handleLoginSuccess(
+    dynamic user,
+    CustomerProvider customerProvider,
+  ) async {
+    // Show success message
+    SnackBarHelper.show(
+      context,
+      AppConstants.loginSuccess,
+      type: SnackBarType.success,
+    );
+
+    if (!mounted) return;
+
+    final redirectRoute =
+        (_redirectRoute == AppConstants.customerInfoRoute ||
+                _redirectRoute == null)
+            ? AppConstants.homeRoute
+            : _redirectRoute!;
+
+    // Sử dụng hasCustomerInfo từ user (backend đã trả về)
+    if (user?.hasCustomerInfo == true) {
+      // Đã có đầy đủ thông tin -> tải thông tin khách hàng và chuyển đến trang chính
+      if (user?.maKhachHang != null) {
+        // Load customer info vào provider để sử dụng trong app
+        await customerProvider.getCustomer(user.maKhachHang!);
+      }
+
+      if (!mounted) return;
+
+      if (_popOnSuccess) {
+        Navigator.of(context).pop();
+      } else {
+        Navigator.of(context).pushReplacementNamed(redirectRoute);
+      }
+    } else {
+      // Chưa có thông tin -> chuyển đến trang nhập thông tin khách hàng
+      Navigator.of(context).pushReplacementNamed(
+        AppConstants.customerInfoRoute,
+        arguments: {
+          "redirectRoute": redirectRoute,
+          "popOnSuccess": _popOnSuccess,
+        },
+      );
     }
   }
 
@@ -314,36 +348,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Google button
-                        _SocialButton(
+                    // Google button
+                    Consumer<AuthProvider>(
+                      builder: (context, authProvider, child) {
+                        return _SocialButton(
                           icon: FontAwesomeIcons.google,
                           color: const Color(0xFFDB4437),
-                          onPressed: () {
-                            SnackBarHelper.show(
-                              context,
-                              'Chức năng đang phát triển',
-                              type: SnackBarType.info,
-                            );
-                          },
-                        ),
-                        const SizedBox(width: 16),
-
-                        // Facebook button
-                        _SocialButton(
-                          icon: FontAwesomeIcons.facebook,
-                          color: const Color(0xFF4267B2),
-                          onPressed: () {
-                            SnackBarHelper.show(
-                              context,
-                              'Chức năng đang phát triển',
-                              type: SnackBarType.info,
-                            );
-                          },
-                        ),
-                      ],
+                          isLoading: authProvider.isLoading,
+                          onPressed: _handleGoogleLogin,
+                        );
+                      },
                     ),
                     const SizedBox(height: 24),
 
@@ -390,11 +404,13 @@ class _SocialButton extends StatelessWidget {
   final IconData icon;
   final Color color;
   final VoidCallback onPressed;
+  final bool isLoading;
 
   const _SocialButton({
     required this.icon,
     required this.color,
     required this.onPressed,
+    this.isLoading = false,
   });
 
   @override
@@ -416,9 +432,18 @@ class _SocialButton extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onPressed,
+          onTap: isLoading ? null : onPressed,
           borderRadius: BorderRadius.circular(30),
-          child: Center(child: FaIcon(icon, color: color, size: 24)),
+          child: Center(
+            child:
+                isLoading
+                    ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                    : FaIcon(icon, color: color, size: 24),
+          ),
         ),
       ),
     );

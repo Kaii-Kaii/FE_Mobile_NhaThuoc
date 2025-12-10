@@ -89,6 +89,33 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  /// Đăng nhập bằng Google
+  Future<bool> loginWithGoogle() async {
+    try {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+
+      // Call Google Login API
+      final user = await _authService.loginWithGoogle();
+
+      // Save user data
+      _user = user;
+      await StorageHelper.setObject(AppConstants.userKey, user.toJson());
+
+      _isLoading = false;
+      notifyListeners();
+
+      return true;
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+
+      return false;
+    }
+  }
+
   /// Đăng ký
   Future<bool> register({
     required String username,
@@ -124,6 +151,9 @@ class AuthProvider with ChangeNotifier {
   Future<void> logout() async {
     try {
       _user = null;
+
+      // Sign out from Google if needed
+      await _authService.signOutGoogle();
 
       // Xóa user data từ local storage
       await StorageHelper.remove(AppConstants.userKey);
