@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:quan_ly_nha_thuoc/providers/auth_provider.dart';
 import 'package:quan_ly_nha_thuoc/providers/cart_provider.dart';
@@ -17,6 +18,17 @@ import 'package:quan_ly_nha_thuoc/utils/storage_helper.dart';
 /// Main entry point
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase with manual configuration
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(
+      apiKey: 'AIzaSyD0Ovif0HZh5MoxkMfdlTCHvoLjFoLY6tk',
+      appId: '1:272239333832:android:1770eb39680ac6c5ca30fd',
+      messagingSenderId: '272239333832',
+      projectId: 'nhathuoc-f9fce',
+      storageBucket: 'nhathuoc-f9fce.firebasestorage.app',
+    ),
+  );
 
   // Initialize SharedPreferences
   await StorageHelper.init();

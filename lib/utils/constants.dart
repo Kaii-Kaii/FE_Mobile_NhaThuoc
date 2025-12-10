@@ -26,6 +26,7 @@ class AppConstants {
 
   // ⚠️ QUAN TRỌNG: Không có dấu / ở đầu để Dio combine đúng với baseUrl
   static const String loginEndpoint = '/TaiKhoan/Login';
+  static const String loginWithGoogleEndpoint = '/TaiKhoan/LoginWithGoogle';
   // Endpoint đăng ký - POST /api/TaiKhoan
   static const String registerEndpoint = '/TaiKhoan';
   // CheckUsername sử dụng query parameter: ?username=xxx
