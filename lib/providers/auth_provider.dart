@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:quan_ly_nha_thuoc/models/user_model.dart';
+import 'package:quan_ly_nha_thuoc/services/api_service.dart';
 import 'package:quan_ly_nha_thuoc/services/auth_service.dart';
 import 'package:quan_ly_nha_thuoc/utils/constants.dart';
 import 'package:quan_ly_nha_thuoc/utils/storage_helper.dart';
@@ -42,6 +43,14 @@ class AuthProvider with ChangeNotifier {
       final userData = StorageHelper.getObject(AppConstants.userKey);
       if (userData != null) {
         _user = UserModel.fromJson(userData);
+
+        // Load và set token từ user data hoặc storage
+        final token =
+            _user?.token ?? StorageHelper.getString(AppConstants.tokenKey);
+        if (token != null && token.isNotEmpty) {
+          await ApiService.setToken(token);
+        }
+
         notifyListeners();
       }
     } catch (e) {
@@ -72,6 +81,11 @@ class AuthProvider with ChangeNotifier {
         password: password,
       );
 
+      // Save token nếu có
+      if (user.token != null && user.token!.isNotEmpty) {
+        await ApiService.setToken(user.token);
+      }
+
       // Save user data
       _user = user;
       await StorageHelper.setObject(AppConstants.userKey, user.toJson());
@@ -98,6 +112,11 @@ class AuthProvider with ChangeNotifier {
 
       // Call Google Login API
       final user = await _authService.loginWithGoogle();
+
+      // Save token nếu có
+      if (user.token != null && user.token!.isNotEmpty) {
+        await ApiService.setToken(user.token);
+      }
 
       // Save user data
       _user = user;
@@ -154,6 +173,9 @@ class AuthProvider with ChangeNotifier {
 
       // Sign out from Google if needed
       await _authService.signOutGoogle();
+
+      // Xóa token JWT
+      await ApiService.clearToken();
 
       // Xóa user data từ local storage
       await StorageHelper.remove(AppConstants.userKey);
