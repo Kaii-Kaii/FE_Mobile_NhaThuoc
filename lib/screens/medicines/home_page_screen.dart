@@ -59,7 +59,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                 ),
               ),
               Text(
-                'AN KHANG',
+                'Medion',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -196,7 +196,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Chào mừng đến với Nhà thuốc An Khang',
+            'Chào mừng đến với Nhà thuốc Medion',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),

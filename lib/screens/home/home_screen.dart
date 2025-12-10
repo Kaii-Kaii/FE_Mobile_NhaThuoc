@@ -119,10 +119,13 @@ class HomeScreen extends StatelessWidget {
               color: Colors.white,
               shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.medical_services,
-              color: AppTheme.primaryColor,
-              size: 24,
+            child: ClipOval(
+              child: Image.asset(
+                'assets/favicon.png',
+                width: 40,
+                height: 40,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
           const SizedBox(width: 12),

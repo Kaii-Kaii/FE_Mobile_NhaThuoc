@@ -440,7 +440,7 @@ class _TrustedBrandScreenState extends State<TrustedBrandScreen> {
             ),
             child: const Center(
               child: Text(
-                'Hệ thống nhà thuốc An Khang',
+                'Hệ thống nhà thuốc Medion',
                 style: TextStyle(
                   color: Color(0xFF03A297),
                   fontWeight: FontWeight.bold,

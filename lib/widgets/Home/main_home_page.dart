@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CartProvider()),
       ],
       child: MaterialApp(
-        title: 'Nhà Thuốc An Khang',
+        title: 'Nhà Thuốc Medion',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme.copyWith(
           colorScheme: AppTheme.lightTheme.colorScheme.copyWith(
@@ -52,9 +52,7 @@ class MyApp extends StatelessWidget {
         // Directly go to HomePageScreen
         home: const HomePageScreen(),
         // Named routes
-        routes: {
-          '/medicines': (context) => const MedicineListScreen(),
-        },
+        routes: {'/medicines': (context) => const MedicineListScreen()},
       ),
     );
   }

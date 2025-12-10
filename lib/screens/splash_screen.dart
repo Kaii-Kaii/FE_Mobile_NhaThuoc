@@ -72,10 +72,13 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.medical_services,
-                    size: 60,
-                    color: AppTheme.primaryColor,
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/favicon.png',
+                      width: 90,
+                      height: 90,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),

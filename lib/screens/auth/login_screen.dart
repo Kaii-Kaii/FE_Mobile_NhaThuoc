@@ -216,10 +216,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
-                      child: const Icon(
-                        Icons.medical_services,
-                        size: 50,
-                        color: AppTheme.primaryColor,
+                      child: ClipOval(
+                        child: Image.asset(
+                          'assets/favicon.png',
+                          width: 70,
+                          height: 70,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),
