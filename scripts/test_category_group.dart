@@ -6,7 +6,7 @@ import 'dart:io';
 Future<void> main() async {
   final hosts = [
     'https://localhost:7283/api/NhomLoai',
-    'https://10.0.2.2:7283/api/NhomLoai',
+    'https://kltn-l679.onrender.com/api/NhomLoai',
   ];
 
   for (var h in hosts) {

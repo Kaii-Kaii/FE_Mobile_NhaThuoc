@@ -3,7 +3,7 @@
 class ApiConstants {
   // API Configuration
   // 🔧 CẤU HÌNH API URL:
-  static const String baseUrl = 'https://10.0.2.2:7283/api';
+  static const String baseUrl = 'https://kltn-l679.onrender.com/api';
 
   // API Endpoints
   static const String medicinesEndpoint = '/Medicines';
@@ -16,7 +16,7 @@ class AppConstants {
 
   // ✅ DÙNG HTTPS (API của bạn đang dùng HTTPS)
   // Cho Android Emulator, dùng 10.0.2.2 để trỏ đến localhost của máy host
-  static const String baseUrl = 'https://10.0.2.2:7283/api';
+  static const String baseUrl = 'https://kltn-l679.onrender.com/api';
 
   // Nếu test trên thiết bị thật hoặc iOS simulator, dùng IP thực:
   // static const String baseUrl = 'https://192.168.1.XXX:7283/api';

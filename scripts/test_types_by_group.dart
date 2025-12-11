@@ -7,7 +7,7 @@ Future<void> main() async {
   final ma = 'NL001';
   final hosts = [
     'https://localhost:7283/api/NhomLoai/Loai/$ma',
-    'https://10.0.2.2:7283/api/NhomLoai/Loai/$ma',
+    'https://kltn-l679.onrender.com/api/NhomLoai/Loai/$ma',
   ];
 
   for (var h in hosts) {
